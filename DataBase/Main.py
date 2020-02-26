@@ -2,7 +2,19 @@ import pydbgen
 from pydbgen import pydbgen
 from tableschema import Table
 from faker import Faker
+import rhinoscript as rs
+import json
 
+filter = "JSON file (*.json)|*.json|All Files (*.*)|*.*||"
+filename = rs.OpenFileName("DataBase\etablissements-denseignement-superieur.json", filter)
+
+#Read JSON data into the datastore variable
+if filename:
+    with open(filename, 'r') as f:
+        datastore = json.load(f)
+
+#Use the new datastore datastructure
+print(datastore["lon"])
 
 Names=[]
 fake=Faker("fr_FR")
