@@ -1,37 +1,21 @@
-import pydbgen
-from pydbgen import pydbgen
-from tableschema import Table
-from faker import Faker
-import rhinoscript as rs
 import json
+Eff=[]
+with open(r'C:\Users\izaganami\Data_proj\effectifout.json') as fp:
+    for line in fp:
+        comment = json.loads(line)
+        Eff.append(comment['fields']['etablissement'])
+print("\nLoading 'effectif' Done\n")
 
-filter = "JSON file (*.json)|*.json|All Files (*.*)|*.*||"
-filename = rs.OpenFileName("DataBase\etablissements-denseignement-superieur.json", filter)
+Cord=[]
+with open(r'C:\Users\izaganami\Data_proj\cordetabout.json') as fp:
+    for line in fp:
+        comment = json.loads(line)
+        Cord.append(comment['fields']['code_uai'])
 
-#Read JSON data into the datastore variable
-if filename:
-    with open(filename, 'r') as f:
-        datastore = json.load(f)
 
-#Use the new datastore datastructure
-print(datastore["lon"])
-
-Names=[]
-fake=Faker("fr_FR")
-for i in range(0,200):
-    name=fake.name()
-    if name not in Names:
-        Names.append(name)
-    print(name)
-
-GenDB=pydbgen.pydb();
-
-Loc=[]
-for i in range(0,200):
-    loc=fake.local_latlng(country_code='FR', coords_only=False)
-    if loc not in Loc:
-        Loc.append(loc)
-    print(loc)
-
-print(fake.address())
-
+print("\nLoading 'cords' Done\n")
+Intersect=[]
+for i in range(len(Eff)):
+    if(Eff[i] in Cord):
+        Intersect.append(Eff[i])
+print("{}/{}/{}/ \n".format(len(Eff),len(Cord),len(Intersect)))
