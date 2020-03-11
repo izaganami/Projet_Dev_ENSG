@@ -2,12 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="40b9f4ca-ebc5-455b-9cd0-be76ba2dd771" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/DataBase/fetchdata.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/DataBase/test.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DataBase/Calc_Address.py" beforeDir="false" afterPath="$PROJECT_DIR$/DataBase/Calc_Address.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DataBase/Main.py" beforeDir="false" afterPath="$PROJECT_DIR$/DataBase/Main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/index.js" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -26,20 +21,20 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="false">
+      <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/DataBase/Calc_Address.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="168">
-              <caret line="11" column="47" lean-forward="true" selection-start-line="11" selection-end-line="12" />
+            <state relative-caret-position="193">
+              <caret line="12" lean-forward="true" selection-start-line="12" selection-end-line="12" />
             </state>
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/DataBase/test.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="42">
-              <caret line="2" lean-forward="true" selection-start-line="2" selection-end-line="2" />
+            <state relative-caret-position="147">
+              <caret line="7" selection-start-line="5" selection-end-line="7" />
               <folding>
                 <element signature="e#0#15#0" expanded="true" />
               </folding>
@@ -191,17 +186,24 @@
       <workItem from="1581514875833" duration="4156000" />
       <workItem from="1582707890433" duration="2943000" />
     </task>
+    <task id="LOCAL-00001" summary="Add unit test">
+      <created>1583932099092</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1583932099092</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="31077000" />
+    <option name="totallyTimeSpent" value="31319000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-7" y="-7" width="1451" height="878" extended-state="6" />
-    <editor active="true" />
     <layout>
       <window_info id="Structure" order="0" weight="0.25" />
-      <window_info content_ui="combo" id="Project" order="1" visible="true" weight="0.20235467" />
+      <window_info active="true" content_ui="combo" id="Project" order="1" visible="true" weight="0.20235467" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" sideWeight="0.4996321" weight="0.32913387" />
@@ -212,7 +214,7 @@
       <window_info anchor="bottom" id="TODO" order="6" />
       <window_info anchor="bottom" id="Version Control" order="7" sideWeight="0.49889624" weight="0.17637795" />
       <window_info anchor="bottom" id="Educational.CheckDetails" order="8" />
-      <window_info active="true" anchor="bottom" id="Terminal" order="9" sideWeight="0.49521708" visible="true" weight="0.36220473" />
+      <window_info anchor="bottom" id="Terminal" order="9" sideWeight="0.49521708" visible="true" weight="0.36220473" />
       <window_info anchor="bottom" id="Python Console" order="10" sideWeight="0.4996321" weight="0.32598424" />
       <window_info anchor="bottom" id="Docker" order="11" show_stripe_button="false" />
       <window_info anchor="bottom" id="Database Changes" order="12" />
@@ -257,7 +259,8 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <option name="LAST_COMMIT_MESSAGE" value="" />
+    <MESSAGE value="Add unit test" />
+    <option name="LAST_COMMIT_MESSAGE" value="Add unit test" />
   </component>
   <component name="editorHistoryManager">
     <entry file="file://$PROJECT_DIR$/keras-video-classification/plot.png" />
@@ -371,13 +374,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/DataBase/Calc_Address.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="168">
-          <caret line="11" column="47" lean-forward="true" selection-start-line="11" selection-end-line="12" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/DataBase/fetchdata.py">
       <provider selected="true" editor-type-id="text-editor" />
     </entry>
@@ -390,11 +386,18 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/DataBase/test.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="42">
-          <caret line="2" lean-forward="true" selection-start-line="2" selection-end-line="2" />
+        <state relative-caret-position="147">
+          <caret line="7" selection-start-line="5" selection-end-line="7" />
           <folding>
             <element signature="e#0#15#0" expanded="true" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/DataBase/Calc_Address.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="193">
+          <caret line="12" lean-forward="true" selection-start-line="12" selection-end-line="12" />
         </state>
       </provider>
     </entry>
