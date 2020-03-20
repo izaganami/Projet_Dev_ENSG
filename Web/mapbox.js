@@ -5,28 +5,28 @@ var map = new mapboxgl.Map({
     center: [1.71,46.74], // starting position [lng, lat]
     zoom: 5 // starting zoom
     });
-;
 
 
-var etudiant = {"0" : {"id" : 0, "domicile_courant" :0, "domicile_familial" : 15, "lieu_etude" :34 , "lieu_travail" :40 , "trajet_courant_familial" :-1 , "trajet_courant_etude" : -1, "trajet_courant_travail" :-1  , "filiere" : "Médecine", "bourse" : true}
-"1" : {"id" : 1, "domicile_courant" : 1, "domicile_familial" : 16, "lieu_etude" : 35, "lieu_travail" : , "trajet_courant_familial" : -1, "trajet_courant_etude" :-1 , "trajet_courant_travail" : -1, "filiere" : "Mathématique", "bourse" : true},
-"2" : {"id" : 2, "domicile_courant" : 2, "domicile_familial" : 17, "lieu_etude" : 35, "lieu_travail" : , "trajet_courant_familial" : -1, "trajet_courant_etude" : -1, "trajet_courant_travail" :-1 , "filiere" :"Géographie" , "bourse" : true},
-"3" : {"id" : 3, "domicile_courant" :3 , "domicile_familial" : 18, "lieu_etude" : 35, "lieu_travail" : , "trajet_courant_familial" -1: , "trajet_courant_etude" :-1 , "trajet_courant_travail" : -1 , "filiere" :"Droit" , "bourse" : true},
+
+var etudiant = {"0" : {"id" : 0, "domicile_courant" :0, "domicile_familial" : 15, "lieu_etude" :34 , "lieu_travail" :40 , "trajet_courant_familial" :-1 , "trajet_courant_etude" : -1, "trajet_courant_travail" :-1  , "filiere" : "Médecine", "bourse" : true},
+"1" : {"id" : 1, "domicile_courant" : 1, "domicile_familial" : 16, "lieu_etude" : 35, "lieu_travail" : -1, "trajet_courant_familial" : -1, "trajet_courant_etude" :-1 , "trajet_courant_travail" : -1, "filiere" : "Mathématique", "bourse" : true},
+"2" : {"id" : 2, "domicile_courant" : 2, "domicile_familial" : 17, "lieu_etude" : 35, "lieu_travail" : -1, "trajet_courant_familial" : -1, "trajet_courant_etude" : -1, "trajet_courant_travail" :-1 , "filiere" :"Géographie" , "bourse" : true},
+"3" : {"id" : 3, "domicile_courant" :3 , "domicile_familial" : 18, "lieu_etude" : 35, "lieu_travail" : -1, "trajet_courant_familial" :-1 , "trajet_courant_etude" :-1 , "trajet_courant_travail" : -1 , "filiere" :"Droit" , "bourse" : true},
 "4" : {"id" : 4, "domicile_courant" : 4, "domicile_familial" : 19, "lieu_etude" : 36, "lieu_travail" :40 , "trajet_courant_familial" : -1, "trajet_courant_etude" :-1 , "trajet_courant_travail" : -1, "filiere" :"Ingénieur" , "bourse" :true },
-"5" : {"id" : 5, "domicile_courant" : 5, "domicile_familial" : 20, "lieu_etude" : 38, "lieu_travail" : , "trajet_courant_familial" : -1, "trajet_courant_etude" :-1 , "trajet_courant_travail" : -1, "filiere" : "Ingénieur", "bourse" :true },
+"5" : {"id" : 5, "domicile_courant" : 5, "domicile_familial" : 20, "lieu_etude" : 38, "lieu_travail" : -1, "trajet_courant_familial" : -1, "trajet_courant_etude" :-1 , "trajet_courant_travail" : -1, "filiere" : "Ingénieur", "bourse" :true },
 "6" : {"id" : 6, "domicile_courant" : 6, "domicile_familial" : 21, "lieu_etude" : 38, "lieu_travail" : 41, "trajet_courant_familial" : -1, "trajet_courant_etude" :-1 , "trajet_courant_travail" : -1, "filiere" : "Droit", "bourse" : true},
-"7" : {"id" : 7, "domicile_courant" :7 , "domicile_familial" : 22, "lieu_etude" : 38, "lieu_travail" : , "trajet_courant_familial" : -1, "trajet_courant_etude" :-1 , "trajet_courant_travail" : -1, "filiere" : "Droit", "bourse" : true},
-"8" : {"id" : 8, "domicile_courant" : 8, "domicile_familial" : 23, "lieu_etude" : 38, "lieu_travail" : , "trajet_courant_familial" : -1, "trajet_courant_etude" :-1 , "trajet_courant_travail" : -1 , "filiere" : "Droit", "bourse" : false},
-"9" : {"id" : 9, "domicile_courant" : 9, "domicile_familial" : 24, "lieu_etude" : 37, "lieu_travail" : , "trajet_courant_familial" : -1, "trajet_courant_etude" :-1 , "trajet_courant_travail" : -1 , "filiere" : "Médecine", "bourse" :false },
-"10" : {"id" : 10, "domicile_courant" :10 , "domicile_familial" : 25 , "lieu_etude" : 37, "lieu_travail" :42 , "trajet_courant_familial" : -1, "trajet_courant_etude" :-1 , "trajet_courant_travail" : -1 , "filiere" :"Médecine" , "bourse" :false },-1
-"11" : {"id" : 11, "domicile_courant" : 11, "domicile_familial" : 26, "lieu_etude" : 39, "lieu_travail" : , "trajet_courant_familial" : -1, "trajet_courant_etude" :-1 , "trajet_courant_travail" : -1, "filiere" : "Informatique", "bourse" : false},
-"12" : {"id" : 12, "domicile_courant" : 12, "domicile_familial" : 27, "lieu_etude" : 39, "lieu_travail" : , "trajet_courant_familial" : -1, "trajet_courant_etude" :-1 , "trajet_courant_travail" : -1, "filiere" :"Informatique" , "bourse" :false },
-"13" : {"id" : 13, "domicile_courant" :13 , "domicile_familial" : 28, "lieu_etude" : 34, "lieu_travail" : , "trajet_courant_familial" : -1, "trajet_courant_etude" :-1 , "trajet_courant_travail" : -1, "filiere" : "Informatique", "bourse" : false},
-"14" : {"id" : 14, "domicile_courant" : 13, "domicile_familial" : 29, "lieu_etude" : 35, "lieu_travail" : , "trajet_courant_familial" : -1, "trajet_courant_etude" :-1 , "trajet_courant_travail" : -1, "filiere" :"Géographie" , "bourse" :false },
+"7" : {"id" : 7, "domicile_courant" :7 , "domicile_familial" : 22, "lieu_etude" : 38, "lieu_travail" : -1, "trajet_courant_familial" : -1, "trajet_courant_etude" :-1 , "trajet_courant_travail" : -1, "filiere" : "Droit", "bourse" : true},
+"8" : {"id" : 8, "domicile_courant" : 8, "domicile_familial" : 23, "lieu_etude" : 38, "lieu_travail" : -1, "trajet_courant_familial" : -1, "trajet_courant_etude" :-1 , "trajet_courant_travail" : -1 , "filiere" : "Droit", "bourse" : false},
+"9" : {"id" : 9, "domicile_courant" : 9, "domicile_familial" : 24, "lieu_etude" : 37, "lieu_travail" : -1, "trajet_courant_familial" : -1, "trajet_courant_etude" :-1 , "trajet_courant_travail" : -1 , "filiere" : "Médecine", "bourse" :false },
+"10" : {"id" : 10, "domicile_courant" :10 , "domicile_familial" : 25 , "lieu_etude" : 37, "lieu_travail" :42 , "trajet_courant_familial" : -1, "trajet_courant_etude" :-1 , "trajet_courant_travail" : -1 , "filiere" :"Médecine" , "bourse" :false },
+"11" : {"id" : 11, "domicile_courant" : 11, "domicile_familial" : 26, "lieu_etude" : 39, "lieu_travail" :-1 , "trajet_courant_familial" : -1, "trajet_courant_etude" :-1 , "trajet_courant_travail" : -1, "filiere" : "Informatique", "bourse" : false},
+"12" : {"id" : 12, "domicile_courant" : 12, "domicile_familial" : 27, "lieu_etude" : 39, "lieu_travail" : -1, "trajet_courant_familial" : -1, "trajet_courant_etude" :-1 , "trajet_courant_travail" : -1, "filiere" :"Informatique" , "bourse" :false },
+"13" : {"id" : 13, "domicile_courant" :13 , "domicile_familial" : 28, "lieu_etude" : 34, "lieu_travail" : -1, "trajet_courant_familial" : -1, "trajet_courant_etude" :-1 , "trajet_courant_travail" : -1, "filiere" : "Informatique", "bourse" : false},
+"14" : {"id" : 14, "domicile_courant" : 13, "domicile_familial" : 29, "lieu_etude" : 35, "lieu_travail" : -1, "trajet_courant_familial" : -1, "trajet_courant_etude" :-1 , "trajet_courant_travail" : -1, "filiere" :"Géographie" , "bourse" :false },
 "15" : {"id" : 15, "domicile_courant" : 13, "domicile_familial" : 30, "lieu_etude" : 36, "lieu_travail" :41 , "trajet_courant_familial" : -1, "trajet_courant_etude" :-1 , "trajet_courant_travail" : -1, "filiere" :"Ingénieur" , "bourse" : false},
-"16" : {"id" : 16, "domicile_courant" : 14, "domicile_familial" : 31, "lieu_etude" : 37, "lieu_travail" : , "trajet_courant_familial" :-1 , "trajet_courant_etude" :-1 , "trajet_courant_travail" : -1 , "filiere" : "Ingénieur", "bourse" : false},
+"16" : {"id" : 16, "domicile_courant" : 14, "domicile_familial" : 31, "lieu_etude" : 37, "lieu_travail" : -1, "trajet_courant_familial" :-1 , "trajet_courant_etude" :-1 , "trajet_courant_travail" : -1 , "filiere" : "Ingénieur", "bourse" : false},
 "17" : {"id" : 17, "domicile_courant" : 14, "domicile_familial" : 32, "lieu_etude" : 38, "lieu_travail" :41 , "trajet_courant_familial" : -1,"trajet_courant_etude" :-1 , "trajet_courant_travail" : -1, "filiere" : "Ingénieur", "bourse" : false},
-"18" : {"id" : 18, "domicile_courant" : 14, "domicile_familial" : 33, "lieu_etude" : 39, "lieu_travail" : , "trajet_courant_familial" : -1, "trajet_courant_etude" :-1 , "trajet_courant_travail" : -1, "filiere" : "Ingénieur", "bourse" : false},
+"18" : {"id" : 18, "domicile_courant" : 14, "domicile_familial" : 33, "lieu_etude" : 39, "lieu_travail" : -1, "trajet_courant_familial" : -1, "trajet_courant_etude" :-1 , "trajet_courant_travail" : -1, "filiere" : "Ingénieur", "bourse" : false},
 "19" : {"id" : 17, "domicile_courant" :14, "domicile_familial" : 33, "lieu_etude" :36 , "lieu_travail" :42 , "trajet_courant_familial" : -1, "trajet_courant_etude" :-1 , "trajet_courant_travail" : -1, "filiere" :"Ingénieur" , "bourse" :false }
 };
 
@@ -67,7 +67,7 @@ var logement = {"0" : {"id" : 0, "lat" : 48.8393948, "lng" :2.6482998 , "nom" : 
 "34" : {"id" : 34, "lat" :48.8410265 , "lng" : 2.5851349, "nom" : "ENSG"},
 "35" : {"id" : 35, "lat" :48.839605 , "lng" :2.587186 , "nom" : "UPEM"},
 "36" : {"id" : 36, "lat" :48.8396339 , "lng" : 2.5840083, "nom" : "ESIEE"},
-"37" : {"id" : 37, "lat" : 48.8411598,, "lng" : 2.5918843, "nom" : "École d’architecture de la ville & des territoires Paris-Est"},
+"37" : {"id" : 37, "lat" : 48.8411598, "lng" : 2.5918843, "nom" : "École d’architecture de la ville & des territoires Paris-Est"},
 "38" : {"id" : 38, "lat" : 48.8407092, "lng" : 2.5849027, "nom" : "ENPC"},
 "39" : {"id" : 39, "lat" : 48.8365277, "lng" :2.5896857 , "nom" : "ESO"},
 "40" : {"id" : 40, "lat" : 48.8339272, "lng" :2.6418314 , "nom" : "McdoLognes"},
