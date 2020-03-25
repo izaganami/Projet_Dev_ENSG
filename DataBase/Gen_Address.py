@@ -27,8 +27,9 @@ def Check_Address_in_Fr(Gen_Address):
     country_string=json.dumps(location.raw,ensure_ascii=True)
     if(country_string != {"error": "Unable to geocode"} ):
         country=json.loads(country_string)
-        print(country["address"]["country"])
-        return True
+        if(country["address"]["country"] == "France"):
+            print(country["address"]["country"])
+            return True
     return False
 
 T=Gen_Address()
