@@ -3,17 +3,17 @@ import re
 import random
 
 DataEtab=[]
-with open(r'C:\Users\izaganami\Data_proj\implantout.json') as fp:
+with open(r'Data_proj/implantout.json') as fp:
     try:
         for line in fp:
             comment = json.loads(line)
-            print(comment['fields']['uai'])
-            DataEtab.append(comment['fields']['uai'])
-    except(UnicodeDecodeError):
+            print(comment['fields']['coordonnees'])
+            DataEtab.append(comment)
+    except(UnicodeDecodeError,KeyError):
         print("\nLoading 'effectif' Done\n")
         print(len(DataEtab))
 
-with open(r'C:\Users\izaganami\Data_proj\residout.json',encoding='utf-8') as fp:
+with open(r'Data_proj\residout.json',encoding='utf-8') as fp:
     for line in fp:
         try:
             resid = json.loads(line)
