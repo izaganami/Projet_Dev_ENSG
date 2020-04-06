@@ -5,7 +5,7 @@ var http = require('http'),
 fs.readFile('./index.html', function (err, html) {
     if (err) {
         console.log('something bad');
-        return res.end('Oops! Something bad happened.');
+        return response.end('Oops! Something bad happened.');
     }
     http.createServer(function(request, response) {
         response.writeHeader(200, {"Content-Type": "text/html"});
