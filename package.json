@@ -17,9 +17,10 @@
   },
   "homepage": "https://github.com/izaganami/Projet_Dev_ENSG#readme",
   "dependencies": {
+    "glob": "^7.1.6",
     "jsonl": "^1.1.2"
   },
   "engines": {
-   "node": "12.1.0"
-   }
+    "node": "12.1.0"
+  }
 }
