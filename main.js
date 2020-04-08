@@ -2,7 +2,8 @@ var http = require('http'),
     fs = require('fs'),
     path = require('path'),
     filePath = path.join(__dirname, 'Web/index.html');
-
+const PORT = process.env.PORT || 3000;
+console.log("Port:"+ PORT)
 var glob = require("glob")
 
 glob("**/*.html", function (er, files) {
@@ -20,5 +21,5 @@ fs.readFile(filePath, {encoding: 'utf-8'}, function (err, html) {
         response.writeHeader(200, {"Content-Type": "text/html"});
         response.write(html);
         response.end();
-    }).listen(8000);
+    }).listen(PORT);
 });
