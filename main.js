@@ -1,10 +1,13 @@
 var http = require('http'),
-    fs = require('fs');
+    fs = require('fs'),
+    path = require('path'),
+    filePath = path.join(__dirname, 'Web/index.html');
 
 
-fs.readFile('./Web/index.html', function (err, html) {
+fs.readFile(filePath, {encoding: 'utf-8'}, function (err, html) {
     if (err) {
         console.log('something bad');
+        console.log(err)
     }
     http.createServer(function(request, response) {
         response.writeHeader(200, {"Content-Type": "text/html"});
