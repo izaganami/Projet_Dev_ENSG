@@ -22,7 +22,7 @@ color: white;
 .box{
 
     display: flex;
-    justify-content: center;
+    justify-content: space-between;
 }
 
 .boutton_main{
@@ -58,4 +58,9 @@ color: white;
 body{
     color: white;
     background-color: rgb(36, 39, 48);
+}
+
+header{
+    display: flex;
+    justify-content: space-between;
 }
