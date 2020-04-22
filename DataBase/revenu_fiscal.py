@@ -45,7 +45,7 @@ seuil = 300
 rev_moyen = calcul_exp(rev_fin,rev_init,seuil,dist)
 ecart_type = 5000
 
-# Si l'étuiant est boursier, on garde les valeurs par défaut, sinon on utilise les valeurs adaptées à la distance
+# Si l'étudiant est boursier, on garde les valeurs par défaut, sinon on utilise les valeurs adaptées à la distance
 if est_boursier:
     revenu_fisc = estime_revenu()
 else:
