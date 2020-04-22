@@ -1,18 +1,10 @@
 
 
 
-#2{
-background: red;
-}
-
-#3{
-    background: green;
-    }
 
 
 
-
-.href_text{
+.text_page{
 color: white;
 }
 
@@ -27,8 +19,43 @@ color: white;
     text-align: center;
 }
 
-#1{
-    width: 50px;
+.box{
+
+    display: flex;
+    justify-content: center;
+}
+
+.boutton_main{
+    width: 300px;
     border-radius: 50%;
-    background: blue;
+    height: 300px;
+    color: white;
+    outline: 0;
+}
+
+
+#boutton_p1{
+    background-color: blue;
+    border-color: blue;
+    animation: 3s linear 1s infinite running slidein;
+}
+
+#boutton_p2{
+    background-color: red;
+    border-color: red;
+    }
+    
+#boutton_p3{
+    background-color: green;
+    border-color: green;
+    }
+
+#boutton_p4{
+    background-color: violet;
+    border-color: violet;
+    }
+
+body{
+    color: white;
+    background-color: rgb(36, 39, 48);
 }
