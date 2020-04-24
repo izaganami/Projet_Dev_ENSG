@@ -429,8 +429,8 @@ with open(r'Data_proj\implantout.json', encoding='utf-8') as file:
                 etab = json.loads(ligne)
                 for i in range(effectif):
                     track+=1
-                    d=create_student(etab["fields"]["coordonnees"], data_etud, bourse_tracker0, sexe_tracker0, etab["fields"]["services"])
-                    data_etud["features"].append(d)
+                    d=create_student(etab["fields"]["coordonnees"], data_etud_gen, bourse_tracker0, sexe_tracker0, etab["fields"]["services"])
+                    data_etud_gen["features"].append(d)
 
 
             except KeyError:
