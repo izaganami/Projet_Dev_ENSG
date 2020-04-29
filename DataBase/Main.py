@@ -11,6 +11,8 @@ sys.path.insert(1,ROOT_DIR )
 import Gen_Address
 import Revenus
 import Calc_Address
+import France
+from math import ceil
 
 
 bourse_list0 = [1, 1]
@@ -214,7 +216,7 @@ data_domic['type'].append({
 })
 data_domic['features'] = []
 
-with open(r'Data_proj\residout.json', encoding='utf-8') as fp:
+with open(r'Data_proj/residout.json', encoding='utf-8') as fp:
     for line in fp:
         id_domic = str(uuid.uuid4())
         type_domicile = ""
@@ -222,28 +224,28 @@ with open(r'Data_proj\residout.json', encoding='utf-8') as fp:
         capacity = 0
         try:
             resid = json.loads(line)
-            print(resid)
+            #print(resid)
             regex = r"\d+ (ch|Ch|t|T|st|St|lit|L|ST)"
             matches = re.finditer(regex, resid["fields"]["infos"], re.MULTILINE)
             tot = 0
             for a, b in enumerate(matches, start=1):
                 tot += b.start()
-                print("Places:{}".format(b.start()))
+                #print("Places:{}".format(b.start()))
             if (tot == 0):
                 tot = random.randint(80, 500)
-                print("Randonly generated")
-            print("Tot:{}".format(tot))
+                #print("Randonly generated")
+            #print("Tot:{}".format(tot))
             try:
                 type_domicile = resid["fields"]["title"]
             except(KeyError):
                 type_domicile = ""
-                print("Type domicile indisp")
+                #print("Type domicile indisp")
             capacity = tot
             try:
                 coordinates_domicile = resid["fields"]["geocalisation"]
             except(KeyError):
                 coordinates_domicile = []
-                print("Coordinate indisp")
+                #print("Coordinate indisp")
             data_domic['features'].append({
                 "type": "Feature",
                 "geometry": {"type": "Point",
@@ -257,7 +259,7 @@ with open(r'Data_proj\residout.json', encoding='utf-8') as fp:
 
         except(KeyError):
             continue
-    print("\nLoading 'resid' Done\n")
+    #print("\nLoading 'resid' Done\n")
 
 with open('data_domicile.geojson', 'w',encoding='utf-8') as outfile:
     json.dump(data_domic, outfile,ensure_ascii=False)
@@ -271,156 +273,374 @@ data_etud['type'].append({
     'name': 'FeatureCollection'
 })
 data_etud['features'] = []
+liste_coord_etab=[]
+with open(r'Data_proj/implantout.json', encoding='utf-8') as file:
+
+    for ligne in file:
+        try:
+            data = json.loads(ligne)
+            lat = data["fields"]["coordonnees"][0]
+            long = data["fields"]["coordonnees"][1]
+            liste_coord_etab.append([lat,long])
+        except:
+            continue
+
 with open(r'data_domicile.geojson', encoding='utf-8') as fp:
+    residence_etudiante = True
     k=0
     bourse_list = [1, 1]## oui , non
     sexe_list = [1,1]##femme , homme
     comment = json.loads(fp.read())
+    i = 0
+    for j in range (100):
+        print(j)
+        id_student = int(uuid.uuid4())
+        sexe = ""
+        bourse = ""
+        emploi = ""
+        coordinates_parents = []
+        coordinates_domicile =[]
+        coordinates_travail_var = []
 
-    for line in comment["features"]:
-        try:
-            bourse_tracker = 100 * bourse_list[0] / (bourse_list[0] + bourse_list[1])
-            sexe_tracker = 100 * sexe_list[0] / (sexe_list[0] + sexe_list[1])
+        situation = ""
 
-            counter = int(line["properties"]["capacity"])
-            coordinates_domicile=line["geometry"]["coordinates"]
-##distance max logement - universite
-            while counter > 0:
-                counter -= 1
-                id_student = int(uuid.uuid4())
-                sexe = ""
-                bourse = ""
-                emploi = ""
-                coordinates_parents = []
+        type_emploi = ""
+        coordinates_travail = []
+        bourse_tracker = 100 * bourse_list[0] / (bourse_list[0] + bourse_list[1])
+        sexe_tracker = 100 * sexe_list[0] / (sexe_list[0] + sexe_list[1])
+        if bourse_tracker <= 38:
+            bourse = random.choice(["oui", "non"])
+            ## ajout de quantile (1er = bourse)
+            if bourse == "oui":
+                bourse_list[0] += 1
+            else:
+                bourse_list[1] += 1
+        else:
+            bourse = "non"
+            bourse_list[1] += 1
 
-                situation = ""
+        if sexe_tracker <= 54:
+            sexe = random.choice(["femme", "homme"])
+            if sexe == "femme":
+                sexe_list[0] += 1
+            else:
+                sexe_list[1] += 1
+        else:
+            sexe = "homme"
+            sexe_list[1] += 1
+        if (j ==0):
+            for line in comment["features"]:
+                try:
 
-                type_emploi = ""
+
+                    #counter = int(int(line["properties"]["capacity"])/10)
+                    counter =1
+                    coordinates_domicile=line["geometry"]["coordinates"]
+        ##distance max logement - universite
+                    while counter > 0:
+
+                        i += 1
+                        print(i)
+
+                        counter -= 1
+
+                        test_adresse_France = False
+                        coordinates_parents_var = []
+                        random_parent_etudiant = 0
+                        vit_chez_parents = False
+                        random_parent_etudiant = random.randrange(1, 100, 1)
+
+                        if (random_parent_etudiant<48):
+
+                                random_etab =random.randrange(0,len(liste_coord_etab)-1,1)
+                                lat = liste_coord_etab[random_etab][0]
+                                long = liste_coord_etab[random_etab][1]
+
+                                T = Gen_Address.Gen_Address()
+                                coordinates_parents_var = T.Gen_Address_Within_Distane(lat,long)
+
+                        else:
+
+                            test = 0
+                            while (test_adresse_France == False):
+                                test += 1
+
+                                T = Gen_Address.Gen_Address()
+
+                                coordinates_parents_var = T.Gen_Address_local()
+                                test_adresse_France = France.in_France(coordinates_parents_var[0],
+                                                                       coordinates_parents_var[1])
+                                if (test > 10):
+                                    break
+
+
+
+                            coordinates_parents = [coordinates_parents_var[0], coordinates_parents_var[1]]
+
+
+                        emploi = random.choice(["oui", "non"])
+                        if emploi == "oui":
+                            coordinates_travail = T.Gen_Address_Within_Distane(coordinates_domicile[0],
+                                                   coordinates_domicile[1])
+                            type_emploi = random.choice(["Assistant(e) d'éducation", "Baby-sitter ","Soutien scolaire ","Serveur(se)","Animateur/Animatrice des ventes","distributeur de flyers","Hôte ou hôtesse d'accueil",
+                                                         "Employé(e) du commerce ou de fast-food","Livreur à vélo, coursier","Enquêteur/Enquêtrice"])
+
+
+                        else:
+                            coordinates_travail = []
+
+
+
+                        rev_init = 20000
+                        rev_fin = 40000
+                        seuil = 300
+                        ecart_type = 5000
+                        C = Calc_Address.Calc_Address()
+                        dist = C.Calc_Distance(coordinates_parents[0], coordinates_parents[1], coordinates_domicile[0],
+                                               coordinates_domicile[1])
+                        #print(dist)
+
+                        R = Revenus.Revenus()
+                        rev_moyen = R.calcul_exp(rev_fin, rev_init, seuil, dist)
+                        revenu_fisc = R.estime_revenu(rev_moyen, ecart_type)
+                        lat=0
+                        long=0
+                        coordinates_etab=[0,0]
+                        discipline=""
+
+
+
+                        if random.randint(0, 100) < 7:
+                            situation = "Married"
+                        else:
+                            situation = "Single"
+
+                        with open(r'Data_proj/implantout.json', encoding='utf-8') as file:
+                            #track = 0
+
+                            dist_min = 1000
+                            for ligne in file:
+                                etab = json.loads(ligne)
+                                try:
+                                    if (C.Calc_Distance(etab["fields"]["coordonnees"][0], etab["fields"]["coordonnees"][1],
+                                                        coordinates_domicile[0],
+                                                        coordinates_domicile[1]) <dist_min):
+                                        dist_min = C.Calc_Distance(etab["fields"]["coordonnees"][0],
+                                                                   etab["fields"]["coordonnees"][1],
+                                                                   coordinates_domicile[0],
+                                                                   coordinates_domicile[1])
+                                        coordinates_etab = [etab["fields"]["coordonnees"][0], etab["fields"]["coordonnees"][1]]
+                                        discipline = etab["fields"]["services"]
+
+
+
+                                    else :
+                                        continue
+
+                                except KeyError:
+                                    continue
+
+                        data_etud['features'].append({
+                            "type": "Feature",
+                            "geometry": {"type": "Point",
+                                         "coordinates": coordinates_domicile},
+                            "properties": {"id_student": id_student,
+                                           "type_domicile": line["properties"]["type_domicile"],
+                                           "sexe": sexe,
+                                           "bourse": bourse,
+                                           "emploi": emploi,
+                                           "coordinates_parents": coordinates_parents,
+                                           "situation": situation,
+                                           "type_emploi": type_emploi,
+                                           "coordinates_travail": coordinates_travail,
+                                           "revenu_fiscal":revenu_fisc[0],
+                                           "lat":coordinates_domicile[0],
+                                           "long":coordinates_domicile[1],
+                                           "coordinates_etab":coordinates_etab,
+                                           "discipline":discipline
+
+                                           }
+                        })
+                        k+=1
+                        bourse_list0 = bourse_list
+                        sexe_list0 = sexe_list
+                        #print(k)
+                        #print(coordinates_parents)
+                        data_etud_gen=data_etud
+
+
+                except(TypeError):
+                    print("Error")
+
+        else:
+            test_adresse_France = False
+            random_parent_etudiant = 0
+            vit_chez_parents = False
+            parent_ville_etudiant_loin = False
+
+            random_vit_chez_parent = random.randrange(1, 164, 1)
+            if (random_vit_chez_parent > 49):
+                vit_chez_parents = True
+            else:
+                random_parent_etudiant = random.randrange(1, 100, 1)
+
+                random_etab = random.randrange(0, len(liste_coord_etab)-1, 1)
+                lat = liste_coord_etab[random_etab][0]
+                long = liste_coord_etab[random_etab][1]
+
+                T = Gen_Address.Gen_Address()
+                coordinates_domicile = T.Gen_Address_Within_Distane(lat, long)
+                if (random_parent_etudiant < 48):
+                    parent_ville_etudiant_loin== True
+            if (vit_chez_parents == True):
+                random_etab = random.randrange(0, len(liste_coord_etab)-1, 1)
+                lat = liste_coord_etab[random_etab][0]
+                long = liste_coord_etab[random_etab][1]
+                test=0
+                while (test_adresse_France == False):
+                    test+=1
+
+                    T = Gen_Address.Gen_Address()
+
+                    coordinates_parents_var = T.Gen_Address_Within_Distane(lat, long)
+                    test_adresse_France = France.in_France(coordinates_parents_var[0], coordinates_parents_var[1])
+                    if (test>10):
+                        break
+
+                coordinates_parents = [coordinates_parents_var[0], coordinates_parents_var[1]]
+                coordinates_domicile = coordinates_parents
+
+            elif (parent_ville_etudiant_loin == True):
+                random_etab = random.randrange(0, len(liste_coord_etab)-1, 1)
+                lat = liste_coord_etab[random_etab][0]
+                long = liste_coord_etab[random_etab][1]
+
+                while (test_adresse_France == False):
+                    T = Gen_Address.Gen_Address()
+
+                    coordinates_parents_var = T.Gen_Address_Within_Distane(lat, long)
+
+                    test_adresse_France = France.in_France(coordinates_parents_var[0], coordinates_parents_var[1])
+
+                coordinates_parents = [coordinates_parents_var[0], coordinates_parents_var[1]]
+
+            else:
+
+                while (test_adresse_France == False):
+                    T = Gen_Address.Gen_Address()
+
+                    coordinates_parents_var = T.Gen_Address_local()
+
+                    test_adresse_France = France.in_France(coordinates_parents_var[0], coordinates_parents_var[1])
+
+
+                coordinates_parents = [coordinates_parents_var[0], coordinates_parents_var[1]]
+
+            emploi = random.choice(["oui", "non"])
+            if emploi == "oui":
+                test_adresse_France = False
+                test=0
+                while (test_adresse_France == False):
+                    test+=1
+                    T = Gen_Address.Gen_Address()
+
+                    coordinates_travail_var = T.Gen_Address_Within_Distane(coordinates_domicile[0],
+                                                                       coordinates_domicile[1])
+
+                    test_adresse_France = France.in_France(coordinates_travail_var[0], coordinates_travail_var[1])
+                    if (test>10):
+                        break
+                coordinates_travail = [coordinates_travail_var[0], coordinates_travail_var[1]]
+
+                type_emploi = random.choice(
+                    ["Assistant(e) d'éducation", "Baby-sitter ", "Soutien scolaire ", "Serveur(se)",
+                     "Animateur/Animatrice des ventes", "distributeur de flyers", "Hôte ou hôtesse d'accueil",
+                     "Employé(e) du commerce ou de fast-food", "Livreur à vélo, coursier", "Enquêteur/Enquêtrice"])
+
+
+            else:
                 coordinates_travail = []
 
-                if bourse_tracker <= 38:
-                    bourse = random.choice(["oui", "non"])
-                    ## ajout de quantile (1er = bourse)
-                    if bourse == "oui":
-                        bourse_list[0] += 1
-                    else:
-                        bourse_list[1] += 1
-                else:
-                    bourse = "non"
-                    bourse_list[1] += 1
+            rev_init = 20000
+            rev_fin = 40000
+            seuil = 300
+            ecart_type = 5000
 
-                if sexe_tracker <= 54:
-                    sexe = random.choice(["femme", "homme"])
-                    if sexe == "femme":
-                        sexe_list[0] += 1
-                    else:
-                        sexe_list[1] += 1
-                else:
-                    sexe = "homme"
-                    sexe_list[1] += 1
-                T = Gen_Address.Gen_Address()
-                coordinates_parents_var = T.Gen_Address_local()
+            C = Calc_Address.Calc_Address()
+            dist = C.Calc_Distance(coordinates_parents[0], coordinates_parents[1], coordinates_domicile[0],
+                                   coordinates_domicile[1])
+            # print(dist)
 
-                coordinates_parents = [coordinates_parents_var[1], coordinates_parents_var[0]]
-                emploi = random.choice(["oui", "non"])
-                if emploi == "oui":
-                    coordinates_travail = T.Gen_Address_Within_Distane(coordinates_domicile[0],
-                                           coordinates_domicile[1])
-                    type_emploi = random.choice(["Assistant(e) d'éducation", "Baby-sitter ","Soutien scolaire ","Serveur(se)","Animateur/Animatrice des ventes","distributeur de flyers","Hôte ou hôtesse d'accueil",
-                                                 "Employé(e) du commerce ou de fast-food","Livreur à vélo, coursier","Enquêteur/Enquêtrice"])
+            R = Revenus.Revenus()
+            rev_moyen = R.calcul_exp(rev_fin, rev_init, seuil, dist)
+            revenu_fisc = R.estime_revenu(rev_moyen, ecart_type)
+            lat = 0
+            long = 0
+            coordinates_etab = [0, 0]
+            discipline = ""
 
+            if random.randint(0, 100) < 7:
+                situation = "Married"
+            else:
+                situation = "Single"
 
-                else:
-                    coordinates_travail = []
+            with open(r'Data_proj/implantout.json', encoding='utf-8') as file:
+                # track = 0
 
-
-
-                rev_init = 20000
-                rev_fin = 40000
-                seuil = 300
-                ecart_type = 5000
-
-                C = Calc_Address.Calc_Address()
-                dist = C.Calc_Distance(coordinates_parents[0], coordinates_parents[1], coordinates_domicile[0],
-                                       coordinates_domicile[1])
-                print(dist)
-
-                R = Revenus.Revenus()
-                rev_moyen = R.calcul_exp(rev_fin, rev_init, seuil, dist)
-                revenu_fisc = R.estime_revenu(rev_moyen, ecart_type)
-                lat=0
-                long=0
-                coordinates_etab=[]
-                discipline=""
+                dist_min = 1000
+                for ligne in file:
+                    etab = json.loads(ligne)
+                    try:
+                        if (C.Calc_Distance(etab["fields"]["coordonnees"][0], etab["fields"]["coordonnees"][1],
+                                            coordinates_domicile[0],
+                                            coordinates_domicile[1]) < dist_min):
+                            dist_min = C.Calc_Distance(etab["fields"]["coordonnees"][0],
+                                                       etab["fields"]["coordonnees"][1],
+                                                       coordinates_domicile[0],
+                                                       coordinates_domicile[1])
+                            coordinates_etab = [etab["fields"]["coordonnees"][0], etab["fields"]["coordonnees"][1]]
+                            discipline = etab["fields"]["services"]
 
 
 
-                if random.randint(0, 100) < 7:
-                    situation = "Married"
-                else:
-                    situation = "Single"
-
-                with open(r'Data_proj\implantout.json', encoding='utf-8') as file:
-                    track = 0
-                    for ligne in file:
-                        try:
-                            track += 1
-                            etab = json.loads(ligne)
-
-                            print(track)
-                            ditance_dom_etab = 2
-                            if (C.Calc_Distance(etab["fields"]["coordonnees"][0], etab["fields"]["coordonnees"][1],
-                                                coordinates_domicile[0],
-                                                coordinates_domicile[1]) < ditance_dom_etab and track < 2559):
-                                coordinates_etab = [etab["fields"]["coordonnees"][0], etab["fields"]["coordonnees"][1]]
-                                discipline = etab["fields"]["services"]
-                                print(discipline)
-                                break
-                            elif (track >= 2559):
-                                coordinates_etab = [etab["fields"]["coordonnees"][0], etab["fields"]["coordonnees"][1]]
-                                discipline = "Classes Prepa"
-                                print(discipline)
-                                break
-                            else:
-                                ditance_dom_etab *= 2
-                                continue
-
-                        except KeyError:
+                        else:
                             continue
 
-                data_etud['features'].append({
-                    "type": "Feature",
-                    "geometry": {"type": "Point",
-                                 "coordinates": coordinates_domicile},
-                    "properties": {"id_student": id_student,
-                                   "type_domicile": line["properties"]["type_domicile"],
-                                   "sexe": sexe,
-                                   "bourse": bourse,
-                                   "emploi": emploi,
-                                   "coordinates_parents": coordinates_parents,
-                                   "situation": situation,
-                                   "type_emploi": type_emploi,
-                                   "coordinates_travail": coordinates_travail,
-                                   "revenu_fiscal":revenu_fisc[0],
-                                   "lat":coordinates_domicile[0],
-                                   "long":coordinates_domicile[1],
-                                   "coordinates_etab":coordinates_etab,
-                                   "discipline":discipline
+                    except KeyError:
+                        continue
 
-                                   }
-                })
-                k+=1
-                bourse_list0 = bourse_list
-                sexe_list0 = sexe_list
-                print(k)
-                print(coordinates_parents)
-                data_etud_gen=data_etud
+            data_etud['features'].append({
+                "type": "Feature",
+                "geometry": {"type": "Point",
+                             "coordinates": coordinates_domicile},
+                "properties": {"id_student": id_student,
+                               "type_domicile": line["properties"]["type_domicile"],
+                               "sexe": sexe,
+                               "bourse": bourse,
+                               "emploi": emploi,
+                               "coordinates_parents": coordinates_parents,
+                               "situation": situation,
+                               "type_emploi": type_emploi,
+                               "coordinates_travail": coordinates_travail,
+                               "revenu_fiscal": revenu_fisc[0],
+                               "lat": coordinates_domicile[0],
+                               "long": coordinates_domicile[1],
+                               "coordinates_etab": coordinates_etab,
+                               "discipline": discipline
+
+                           }
+        })
+        k += 1
+        bourse_list0 = bourse_list
+        sexe_list0 = sexe_list
+        # print(k)
+        # print(coordinates_parents)
+        data_etud_gen = data_etud
 
 
-        except(TypeError):
-            print("Error")
 
-with open(r'Data_proj\implantout.json', encoding='utf-8') as file:
+"""
+with open(r'Data_proj/implantout.json', encoding='utf-8') as file:
     track = 0
     for ligne in file:
         if track < 370000:
@@ -435,7 +655,8 @@ with open(r'Data_proj\implantout.json', encoding='utf-8') as file:
 
             except KeyError:
                 continue
-    print(track)
+    #print(track)
+"""
 
 with open('data_stud.geojson', 'w', encoding='utf-8') as outfile:
     json.dump(data_etud, outfile, ensure_ascii=False)
