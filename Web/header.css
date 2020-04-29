@@ -9,7 +9,7 @@ color: white;
 }
 
 .img{
-    width: 175px;
+    height: 20vh;
     display: block;
     margin-left: auto;
     margin-right: auto;
@@ -26,13 +26,14 @@ color: white;
 }
 
 .boutton_main{
-    width: 300px;
+    width: 20vw;
     border-radius: 50%;
-    height: 300px;
+    height: 20vw;
     color: white;
     outline: 0;
+    font-size: 100%;
+    transition-duration: 0.5s;
 }
-
 
 #boutton_p1{
     background-color: blue;
@@ -40,20 +41,41 @@ color: white;
     animation: 3s linear 1s infinite running slidein;
 }
 
+#boutton_p1:hover{
+    background-color:darkblue;
+}
+
 #boutton_p2{
     background-color: red;
     border-color: red;
     }
     
+#boutton_p2:hover{
+    background-color:darkred;
+}
+
 #boutton_p3{
     background-color: green;
     border-color: green;
     }
 
+#boutton_p3:hover{
+    background-color:darkgreen;
+}
+
 #boutton_p4{
     background-color: violet;
     border-color: violet;
     }
+
+#boutton_p4:hover{
+    background-color:darkviolet;
+}
+
+#boutton_p1:active, #boutton_p2:active, #boutton_p3:active, #boutton_p4:active{
+    background-color: white;
+    color: black;
+}
 
 body{
     color: white;
