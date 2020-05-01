@@ -10,7 +10,7 @@ glob("**/*.html", function (er, files) {
     console.log(files)
 })
 
-/**var app = require('http').createServer(createServer);
+var app = require('http').createServer(createServer);
 var url = require('url');
 
 function createServer(req, res) {
@@ -24,7 +24,7 @@ function createServer(req, res) {
     }
 
     switch(path) {
-        case '/subpage':
+        case '/Page_1.html':
             doc = fs.readFile(__dirname + 'Web/Page_1.html', fsCallback);
         break;
         default:
@@ -34,7 +34,7 @@ function createServer(req, res) {
 }
 
 app.listen(PORT);
-**/
+/**
 fs.readFile(filePath, {encoding: 'utf-8'}, function (err, html) {
     if (err) {
 
@@ -48,4 +48,4 @@ fs.readFile(filePath, {encoding: 'utf-8'}, function (err, html) {
         response.end();
 
     }).listen(PORT);
-});
+});**/
