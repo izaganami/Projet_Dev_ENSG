@@ -10,6 +10,8 @@ glob("**/*.html", function (er, files) {
     console.log(files)
 })
 
+
+
 var app = require('http').createServer(createServer);
 var url = require('url');
 
@@ -24,16 +26,17 @@ function createServer(req, res) {
     }
 
     switch(path) {
-        case '/Page_1.html':
-            doc = fs.readFile(__dirname + 'Web/Page_1.html', fsCallback);
+        case '/subpage':
+            doc = fs.readFile(__dirname + '/Web/Page_1.html', fsCallback);
         break;
         default:
-            doc = fs.readFile(__dirname + 'Web/index.html', fsCallback);
+            doc = fs.readFile(__dirname + '/Web/index.html', fsCallback);
         break;
     }
 }
 
 app.listen(PORT);
+
 /**
 fs.readFile(filePath, {encoding: 'utf-8'}, function (err, html) {
     if (err) {
