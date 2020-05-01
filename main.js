@@ -10,7 +10,32 @@ glob("**/*.html", function (er, files) {
     console.log(files)
 })
 
-fs.readFile(filePath, {encoding: 'utf-8'}, function (err, html) {
+var app = require('http').createServer(createServer);
+var url = require('url');
+
+function createServer(req, res) {
+    var path = url.parse(req.url).pathname;
+    var fsCallback = function(error, data) {
+        if(error) throw error;
+
+        res.writeHead(200);
+        res.write(data);
+        res.end();
+    }
+
+    switch(path) {
+        case '/subpage':
+            doc = fs.readFile(__dirname + 'Web/Page_1.html', fsCallback);
+        break;
+        default:
+            doc = fs.readFile(__dirname + 'Web/index.html', fsCallback);
+        break;
+    }
+}
+
+app.listen(PORT);
+
+/***fs.readFile(filePath, {encoding: 'utf-8'}, function (err, html) {
     if (err) {
 
         console.log('something bad');
@@ -21,5 +46,6 @@ fs.readFile(filePath, {encoding: 'utf-8'}, function (err, html) {
         response.writeHeader(200, {"Content-Type": "text/html"});
         response.write(html);
         response.end();
+
     }).listen(PORT);
 });
