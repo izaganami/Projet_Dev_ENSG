@@ -6,6 +6,12 @@ import geojson
 import numpy as np
 import random
 import csv
+import France
+from shapely.geometry import shape, Point
+
+###brui sur les horaires###
+def gen_random_noise(decimal):
+    return round(random.uniform(-10, 10), decimal)
 
 ############ TEMPS DE TRAJET ###########
 
@@ -120,7 +126,6 @@ def horaires_cours(lat_domicile, long_domicile, lat_etude, long_etude):
         heure_debut_cours = 12.5
         random_duree = random.uniform(5,7.5)
 
-    int
     a = int(random_duree);
     dif = random_duree - float(a);
     if (dif < 0.25):
@@ -130,7 +135,6 @@ def horaires_cours(lat_domicile, long_domicile, lat_etude, long_etude):
 
     else:
         random_duree = a + 1;
-
     heure_fin_cours = random_duree+heure_debut_cours
 
 
@@ -141,7 +145,6 @@ def horaires_cours(lat_domicile, long_domicile, lat_etude, long_etude):
 
     heure_depart_domicile = heure_debut_cours - temps_trajet
     heure_arrivee_domicile = heure_fin_cours + temps_trajet
-
 
     return heure_depart_domicile, heure_debut_cours, heure_fin_cours, heure_arrivee_domicile
 
@@ -204,22 +207,45 @@ def horaires_travail(heure_arrivee_domicile, lat_domicile, long_domicile, lat_tr
     heure_arrivee_minimale_travail = heure_arrivee_domicile + temps_domicile_travail
 
     if (visite_parent == True and heure_arrivee_minimale_travail >= 20):
-        return None,None,None,None
+        return None,None,None,None,None
 
     if (random == 0):
         if (heure_arrivee_minimale_travail < 20)  :
-            return travail_soir(heure_arrivee_minimale_travail,temps_domicile_travail)
+            heure_depart_domicile_travail, heure_debut_travail, heure_fin_travail, heure_arrivee_domicile_travail = travail_soir(heure_arrivee_minimale_travail,temps_domicile_travail)
+            travail_semaine_weekend = "soir"
+            return heure_depart_domicile_travail, heure_debut_travail, heure_fin_travail, heure_arrivee_domicile_travail, travail_semaine_weekend
+
+
         else:
-            return travail_weekend(temps_domicile_travail)
+            heure_depart_domicile_travail, heure_debut_travail, heure_fin_travail, heure_arrivee_domicile_travail = travail_weekend(
+                temps_domicile_travail)
+            travail_semaine_weekend = "week-end"
+            return heure_depart_domicile_travail, heure_debut_travail, heure_fin_travail, heure_arrivee_domicile_travail, travail_semaine_weekend
+
     else:
         if (visite_parent == False ):
-            return travail_weekend(temps_domicile_travail)
+            heure_depart_domicile_travail, heure_debut_travail, heure_fin_travail, heure_arrivee_domicile_travail =travail_weekend(temps_domicile_travail)
+            travail_semaine_weekend = "week-end"
+            return heure_depart_domicile_travail, heure_debut_travail, heure_fin_travail, heure_arrivee_domicile_travail, travail_semaine_weekend
         else:
-            return travail_soir(heure_arrivee_minimale_travail,temps_domicile_travail)
+            heure_depart_domicile_travail, heure_debut_travail, heure_fin_travail, heure_arrivee_domicile_travail = travail_soir(heure_arrivee_minimale_travail,temps_domicile_travail)
+            travail_semaine_weekend = "soir"
+            return heure_depart_domicile_travail, heure_debut_travail, heure_fin_travail, heure_arrivee_domicile_travail, travail_semaine_weekend
 
 
 
 def horaires_parent(lat_domicile, long_domicile, lat_parent, long_parent):
+    """
+
+    :param lat_domicile: latitude du domicile de l'étudiant
+    :param long_domicile: longitude du domicile de l'étudiant
+    :param lat_parent: latitude du domicile des parents
+    :param long_parent: longitude du domicile des parents
+    :return: heure de départ du domicile de l'étudiant pour se rendre chez ses parents,
+    heure d'arrivée chez ses parents,
+    heure de départ du domicile parental pour rentrer à son domicile étudiant
+    heure d'arrivée à son domicile étudiant
+    """
     
     temps_trajet = Calc_Temps_Trajet(lat_domicile, long_domicile, lat_parent, long_parent)
     heure_depart_domicile = random.uniform(7,11)
@@ -231,28 +257,65 @@ def horaires_parent(lat_domicile, long_domicile, lat_parent, long_parent):
 
 
 
-def creer_donnees_arc(nom_fichier_arc, travail, lat_domicile, long_domicile, lat_etude, long_etude, lat_parent, long_parent, lat_travail, long_travail,visite_parent):
+def creer_donnees_arc(nom_fichier_arc, lat_domicile, long_domicile, lat_etude, long_etude, lat_parent,
+                          long_parent, lat_travail, long_travail, visite_parent, sexe, filiere, boursier, revenu_fiscal,
+                          situation, region_domicile, region_parent):
+    """
+    créer un fichier csv dans lequel se trouve les arcs entre les différents lieux
+    :param nom_fichier_arc: nom du fichier dans lequel seront stockés les arcs
+    :param lat_domicile: latitude du domicile de l'étudiant
+    :param long_domicile: longitude du domicile de l'étudiant
+    :param lat_etude: latitude du lieu d'étude
+    :param long_etude: longitude du lieu d'étude
+    :param lat_parent: latitude du domicile des parents
+    :param long_parent: longitude du domicile des parents
+    :param lat_travail: latitude du lieu de travail de l'étudiant
+    :param long_travail: longitude du lieu de travail de l'étudiant
+    :param visite_parent: boolean, True si il rentre chez ses parents le week-end, False sinon
+    :param sexe: sexe de l'étudiant
+    :param filiere: filière de l'étudiant
+    :param boursier: oui ou non
+    :param revenu_fiscal: revenu fiscal du foyer parental de l'étudiant
+    :param situation: marrié ou célibataire
+    :param region_domicile: région où vit l'étudiant
+    :param region_parent: région où vivent les parents de l'étudiant
+    :return:
+    """
 
     with open(nom_fichier_arc, 'a', newline='') as csvfile:
 
-        fieldnames = ['depart_lat', 'depart_lng','arrivee_lat','arrivee_lng','type']
+        fieldnames = ['depart_lat', 'depart_lng', 'arrivee_lat', 'arrivee_lng', 'type', 'sexe', 'filiere', 'boursier',
+                      'revenu_fiscal', 'situation', 'region_domicile', 'region_parent']
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
 
-        writer.writerow({'depart_lat': lat_domicile, 'depart_lng' : long_domicile, 'arrivee_lat': lat_etude,'arrivee_lng' : long_etude,'type':'etude'})
+        writer.writerow({'depart_lat': lat_domicile, 'depart_lng': long_domicile, 'arrivee_lat': lat_etude,
+                         'arrivee_lng': long_etude, 'type': 'etude',
+                         'sexe': sexe, 'filiere': filiere, 'boursier': boursier, 'revenu_fiscal': revenu_fiscal,
+                         'situation': situation, 'region_domicile': region_domicile, 'region_parent': region_parent})
 
-        if (lat_parent is not None and visite_parent ==True):
-            writer.writerow({'depart_lat': lat_domicile, 'depart_lng' : long_domicile, 'arrivee_lat': lat_parent,'arrivee_lng' : long_parent,'type':'parent'})
+        if (lat_parent is not None and visite_parent == True):
+            writer.writerow({'depart_lat': lat_domicile, 'depart_lng': long_domicile, 'arrivee_lat': lat_parent,
+                             'arrivee_lng': long_parent, 'type': 'parent', 'sexe': sexe, 'filiere': filiere,
+                             'boursier': boursier, 'revenu_fiscal': revenu_fiscal, 'situation': situation,
+                             'region_domicile': region_domicile, 'region_parent': region_parent})
 
-        if(travail is not None):
-            writer.writerow({'depart_lat': lat_domicile, 'depart_lng' : long_domicile, 'arrivee_lat': lat_travail,'arrivee_lng' : long_travail, 'type':'travail'})
+        if (lat_travail is not None):
+            writer.writerow({'depart_lat': lat_domicile, 'depart_lng': long_domicile, 'arrivee_lat': lat_travail,
+                             'arrivee_lng': long_travail, 'type': 'travail', 'sexe': sexe, 'filiere': filiere,
+                             'boursier': boursier, 'revenu_fiscal': revenu_fiscal, 'situation': situation,
+                             'region_domicile': region_domicile, 'region_parent': region_parent})
 
 
+def creer_donnees_trip(lat_domicile, long_domicile, lat_parent, long_parent, lat_etude, long_etude, lat_travail,
+                           long_travail,
+                           heure_domicile_etude_depart,
+                           heure_domicile_etude_arrivee, heure_etude_domicile_depart, heure_etude_domicile_arrivee,
+                           heure_domicile_parent_depart, heure_domicile_parent_arrivee, heure_parent_domicile_depart,
+                           heure_parent_domicile_arrivee, heure_depart_domicile_travail, heure_debut_travail,
+                           heure_fin_travail, heure_arrivee_domicile_travail, travail_semaine_weekend,
+                           sexe, filiere, boursier, revenu_fiscal, situation,
+                           region_domicile, region_parent):
 
-
-
-
-
-def creer_donnees_trip(lat_1, long_1, lat_2, long_2, heure_1_depart, heure_1_arrivee, heure_2_depart, heure_2_arrivee, sexe, filiere, boursier, revenu_fiscal, situation):
     """
 
     :param lat_1: latitude du domicile étudiant
@@ -266,59 +329,601 @@ def creer_donnees_trip(lat_1, long_1, lat_2, long_2, heure_1_depart, heure_1_arr
     :return: trip du domicile au parent
     """
 
-    timestamp_heure_1_depart = datetime.datetime.strptime("04/11/20 "+str(int(heure_1_depart))+":"+str(int(heure_1_depart % 1 * 60)),'%m/%d/%y %H:%M')
-    timestamp_heure_1_arrivee = datetime.datetime.strptime("04/11/20 "+str(int(heure_1_arrivee))+":"+str(int(heure_1_arrivee % 1 * 60)),'%m/%d/%y %H:%M')
-    timestamp_heure_2_depart = datetime.datetime.strptime("04/12/20 "+str(int(heure_2_depart))+":"+str(int(heure_2_depart % 1 * 60)),'%m/%d/%y %H:%M')
-    timestamp_heure_2_arrivee = datetime.datetime.strptime("04/12/20 "+str(int(heure_2_arrivee))+":"+str(int(heure_2_arrivee % 1 * 60)),'%m/%d/%y %H:%M')
+
+    ###### FORMATAGE DES HEURES AU FORMAT TIMESTAMP ######
+
+    timestamp_heure_domicile_etude_depart_lundi = datetime.datetime.strptime(
+        "04/06/20 " + str(int(heure_domicile_etude_depart)) + ":" + str(int(heure_domicile_etude_depart % 1 * 60)),
+        '%m/%d/%y %H:%M')
+
+    timestamp_heure_domicile_etude_arrivee_lundi = datetime.datetime.strptime(
+        "04/06/20 " + str(int(heure_domicile_etude_arrivee)) + ":" + str(int(heure_domicile_etude_arrivee % 1 * 60)),
+        '%m/%d/%y %H:%M')
+    timestamp_heure_etude_domicile_depart_lundi = datetime.datetime.strptime(
+        "04/06/20 " + str(int(heure_etude_domicile_depart)) + ":" + str(int(heure_etude_domicile_depart % 1 * 60)),
+        '%m/%d/%y %H:%M')
+    timestamp_heure_etude_domicile_arrivee_lundi = datetime.datetime.strptime(
+        "04/06/20 " + str(int(heure_etude_domicile_arrivee)) + ":" + str(int(heure_etude_domicile_arrivee % 1 * 60)),
+        '%m/%d/%y %H:%M')
+
+    timestamp_heure_domicile_etude_depart_mardi = datetime.datetime.strptime(
+        "04/07/20 " + str(int(heure_domicile_etude_depart)) + ":" + str(int(heure_domicile_etude_depart % 1 * 60)),
+        '%m/%d/%y %H:%M')
+    timestamp_heure_domicile_etude_arrivee_mardi = datetime.datetime.strptime(
+        "04/07/20 " + str(int(heure_domicile_etude_arrivee)) + ":" + str(int(heure_domicile_etude_arrivee % 1 * 60)),
+        '%m/%d/%y %H:%M')
+    timestamp_heure_etude_domicile_depart_mardi = datetime.datetime.strptime(
+        "04/07/20 " + str(int(heure_etude_domicile_depart)) + ":" + str(int(heure_etude_domicile_depart % 1 * 60)),
+        '%m/%d/%y %H:%M')
+    timestamp_heure_etude_domicile_arrivee_mardi = datetime.datetime.strptime(
+        "04/07/20 " + str(int(heure_etude_domicile_arrivee)) + ":" + str(int(heure_etude_domicile_arrivee % 1 * 60)),
+        '%m/%d/%y %H:%M')
+
+    timestamp_heure_domicile_etude_depart_mercredi = datetime.datetime.strptime(
+        "04/08/20 " + str(int(heure_domicile_etude_depart)) + ":" + str(int(heure_domicile_etude_depart % 1 * 60)),
+        '%m/%d/%y %H:%M')
+    timestamp_heure_domicile_etude_arrivee_mercredi = datetime.datetime.strptime(
+        "04/08/20 " + str(int(heure_domicile_etude_arrivee)) + ":" + str(int(heure_domicile_etude_arrivee % 1 * 60)),
+        '%m/%d/%y %H:%M')
+    timestamp_heure_etude_domicile_depart_mercredi = datetime.datetime.strptime(
+        "04/08/20 " + str(int(heure_etude_domicile_depart)) + ":" + str(int(heure_etude_domicile_depart % 1 * 60)),
+        '%m/%d/%y %H:%M')
+    timestamp_heure_etude_domicile_arrivee_mercredi = datetime.datetime.strptime(
+        "04/08/20 " + str(int(heure_etude_domicile_arrivee)) + ":" + str(int(heure_etude_domicile_arrivee % 1 * 60)),
+        '%m/%d/%y %H:%M')
+
+    timestamp_heure_domicile_etude_depart_jeudi = datetime.datetime.strptime(
+        "04/09/20 " + str(int(heure_domicile_etude_depart)) + ":" + str(int(heure_domicile_etude_depart % 1 * 60)),
+        '%m/%d/%y %H:%M')
+    timestamp_heure_domicile_etude_arrivee_jeudi = datetime.datetime.strptime(
+        "04/09/20 " + str(int(heure_domicile_etude_arrivee)) + ":" + str(int(heure_domicile_etude_arrivee % 1 * 60)),
+        '%m/%d/%y %H:%M')
+    timestamp_heure_etude_domicile_depart_jeudi = datetime.datetime.strptime(
+        "04/09/20 " + str(int(heure_etude_domicile_depart)) + ":" + str(int(heure_etude_domicile_depart % 1 * 60)),
+        '%m/%d/%y %H:%M')
+    timestamp_heure_etude_domicile_arrivee_jeudi = datetime.datetime.strptime(
+        "04/09/20 " + str(int(heure_etude_domicile_arrivee)) + ":" + str(int(heure_etude_domicile_arrivee % 1 * 60)),
+        '%m/%d/%y %H:%M')
+
+    timestamp_heure_domicile_etude_depart_vendredi = datetime.datetime.strptime(
+        "04/10/20 " + str(int(heure_domicile_etude_depart)) + ":" + str(int(heure_domicile_etude_depart % 1 * 60)),
+        '%m/%d/%y %H:%M')
+    timestamp_heure_domicile_etude_arrivee_vendredi = datetime.datetime.strptime(
+        "04/10/20 " + str(int(heure_domicile_etude_arrivee)) + ":" + str(int(heure_domicile_etude_arrivee % 1 * 60)),
+        '%m/%d/%y %H:%M')
+    timestamp_heure_etude_domicile_depart_vendredi = datetime.datetime.strptime(
+        "04/10/20 " + str(int(heure_etude_domicile_depart)) + ":" + str(int(heure_etude_domicile_depart % 1 * 60)),
+        '%m/%d/%y %H:%M')
+    timestamp_heure_etude_domicile_arrivee_vendredi = datetime.datetime.strptime(
+        "04/10/20 " + str(int(heure_etude_domicile_arrivee)) + ":" + str(int(heure_etude_domicile_arrivee % 1 * 60)),
+        '%m/%d/%y %H:%M')
+
+    timestamp_heure_1_depart = datetime.datetime.strptime(
+        "04/11/20 " + str(int(heure_domicile_parent_depart)) + ":" + str(int(heure_domicile_parent_depart % 1 * 60)),
+        '%m/%d/%y %H:%M')
+    timestamp_heure_1_arrivee = datetime.datetime.strptime(
+        "04/11/20 " + str(int(heure_domicile_parent_arrivee)) + ":" + str(int(heure_domicile_parent_arrivee % 1 * 60)),
+        '%m/%d/%y %H:%M')
+    timestamp_heure_2_depart = datetime.datetime.strptime(
+        "04/12/20 " + str(int(heure_parent_domicile_depart)) + ":" + str(int(heure_parent_domicile_depart % 1 * 60)),
+        '%m/%d/%y %H:%M')
+    timestamp_heure_2_arrivee = datetime.datetime.strptime(
+        "04/12/20 " + str(int(heure_parent_domicile_arrivee)) + ":" + str(int(heure_parent_domicile_arrivee % 1 * 60)),
+        '%m/%d/%y %H:%M')
+
+    allez_travail_lundi_feature = retour_travail_lundi_feature= allez_travail_mardi_feature= retour_travail_mardi_feature= \
+    allez_travail_mercredi_feature=retour_travail_mercredi_feature= allez_travail_jeudi_feature= retour_travail_jeudi_feature= \
+    allez_travail_vendredi_feature= retour_travail_vendredi_feature=allez_travail_samedi_feature=retour_travail_samedi_feature=\
+        allez_travail_dimanche_feature=retour_travail_dimanche_feature= ""
+    properties_aller_travail = {'name': "allez", 'type_trip': "domicile_travail", 'sexe': sexe, 'filiere': filiere,
+                                'boursier': boursier, 'revenu_fiscal': revenu_fiscal, 'situation': situation,
+                                'region_domicile': region_domicile, 'region_parent': region_parent}
+    properties_retour_travail = {'name': "retour", 'type_trip': "travail_domicile", 'sexe': sexe, 'filiere': filiere,
+                                 'boursier': boursier, 'revenu_fiscal': revenu_fiscal, 'situation': situation,
+                                 'region_domicile': region_domicile, 'region_parent': region_parent}
 
 
-    allez_parent = geojson.LineString([[long_1, lat_1, 0,datetime.datetime.timestamp(timestamp_heure_1_depart)+7200],
-                           [long_2, lat_2, 0,datetime.datetime.timestamp(timestamp_heure_1_arrivee)+7200 ],
-                                [long_2+0.000001, lat_2+0.000001, 0, datetime.datetime.timestamp(timestamp_heure_1_arrivee)+7200.0001]])
-
-    retour_parent = geojson.LineString([[long_2, lat_2, 0,datetime.datetime.timestamp(timestamp_heure_2_depart)+7200],
-                           [long_1, lat_1, 0,datetime.datetime.timestamp(timestamp_heure_2_arrivee)+7200 ],
-                                 [long_1+0.000001, lat_1+0.000001, 0, datetime.datetime.timestamp(timestamp_heure_2_arrivee)+7200.0001]])
 
 
+    if (travail_semaine_weekend == "soir"):
+
+        timestamp_heure_domicile_travail_depart_lundi = datetime.datetime.strptime(
+            "04/06/20 " + str(int(heure_depart_domicile_travail)) + ":" + str(
+                int(heure_depart_domicile_travail % 1 * 60)),
+            '%m/%d/%y %H:%M')
+
+        timestamp_heure_domicile_travail_arrivee_lundi = datetime.datetime.strptime(
+            "04/06/20 " + str(int(heure_debut_travail)) + ":" + str(
+                int(heure_debut_travail % 1 * 60)),
+            '%m/%d/%y %H:%M')
+
+        timestamp_heure_travail_domicile_depart_lundi = datetime.datetime.strptime(
+            "04/06/20 " + str(int(heure_fin_travail)) + ":" + str(
+                int(heure_fin_travail % 1 * 60)),
+            '%m/%d/%y %H:%M')
+
+        timestamp_heure_travail_domicile_arrivee_lundi = datetime.datetime.strptime(
+            "04/06/20 " + str(int(heure_arrivee_domicile_travail)) + ":" + str(
+                int(heure_arrivee_domicile_travail % 1 * 60)),
+            '%m/%d/%y %H:%M')
+
+        timestamp_heure_domicile_travail_depart_mardi = datetime.datetime.strptime(
+            "04/07/20 " + str(int(heure_depart_domicile_travail)) + ":" + str(
+                int(heure_depart_domicile_travail % 1 * 60)),
+            '%m/%d/%y %H:%M')
+
+        timestamp_heure_domicile_travail_arrivee_mardi = datetime.datetime.strptime(
+            "04/07/20 " + str(int(heure_debut_travail)) + ":" + str(
+                int(heure_debut_travail % 1 * 60)),
+            '%m/%d/%y %H:%M')
+
+        timestamp_heure_travail_domicile_depart_mardi = datetime.datetime.strptime(
+            "04/07/20 " + str(int(heure_fin_travail)) + ":" + str(
+                int(heure_fin_travail % 1 * 60)),
+            '%m/%d/%y %H:%M')
+
+        timestamp_heure_travail_domicile_arrivee_mardi = datetime.datetime.strptime(
+            "04/07/20 " + str(int(heure_arrivee_domicile_travail)) + ":" + str(
+                int(heure_arrivee_domicile_travail % 1 * 60)),
+            '%m/%d/%y %H:%M')
+
+        timestamp_heure_domicile_travail_depart_mercredi = datetime.datetime.strptime(
+            "04/08/20 " + str(int(heure_depart_domicile_travail)) + ":" + str(
+                int(heure_depart_domicile_travail % 1 * 60)),
+            '%m/%d/%y %H:%M')
+
+        timestamp_heure_domicile_travail_arrivee_mercredi = datetime.datetime.strptime(
+            "04/08/20 " + str(int(heure_debut_travail)) + ":" + str(
+                int(heure_debut_travail % 1 * 60)),
+            '%m/%d/%y %H:%M')
+
+        timestamp_heure_travail_domicile_depart_mercredi = datetime.datetime.strptime(
+            "04/08/20 " + str(int(heure_fin_travail)) + ":" + str(
+                int(heure_fin_travail % 1 * 60)),
+            '%m/%d/%y %H:%M')
+
+        timestamp_heure_travail_domicile_arrivee_mercredi = datetime.datetime.strptime(
+            "04/08/20 " + str(int(heure_arrivee_domicile_travail)) + ":" + str(
+                int(heure_arrivee_domicile_travail % 1 * 60)),
+            '%m/%d/%y %H:%M')
+
+        timestamp_heure_domicile_travail_depart_jeudi = datetime.datetime.strptime(
+            "04/09/20 " + str(int(heure_depart_domicile_travail)) + ":" + str(
+                int(heure_depart_domicile_travail % 1 * 60)),
+            '%m/%d/%y %H:%M')
+
+        timestamp_heure_domicile_travail_arrivee_jeudi = datetime.datetime.strptime(
+            "04/09/20 " + str(int(heure_debut_travail)) + ":" + str(
+                int(heure_debut_travail % 1 * 60)),
+            '%m/%d/%y %H:%M')
+
+        timestamp_heure_travail_domicile_depart_jeudi = datetime.datetime.strptime(
+            "04/09/20 " + str(int(heure_fin_travail)) + ":" + str(
+                int(heure_fin_travail % 1 * 60)),
+            '%m/%d/%y %H:%M')
+
+        timestamp_heure_travail_domicile_arrivee_jeudi = datetime.datetime.strptime(
+            "04/09/20 " + str(int(heure_arrivee_domicile_travail)) + ":" + str(
+                int(heure_arrivee_domicile_travail % 1 * 60)),
+            '%m/%d/%y %H:%M')
+
+        timestamp_heure_domicile_travail_depart_vendredi = datetime.datetime.strptime(
+            "04/10/20 " + str(int(heure_depart_domicile_travail)) + ":" + str(
+                int(heure_depart_domicile_travail % 1 * 60)),
+            '%m/%d/%y %H:%M')
+
+        timestamp_heure_domicile_travail_arrivee_vendredi = datetime.datetime.strptime(
+            "04/10/20 " + str(int(heure_debut_travail)) + ":" + str(
+                int(heure_debut_travail % 1 * 60)),
+            '%m/%d/%y %H:%M')
+
+        timestamp_heure_travail_domicile_depart_vendredi = datetime.datetime.strptime(
+            "04/10/20 " + str(int(heure_fin_travail)) + ":" + str(
+                int(heure_fin_travail % 1 * 60)),
+            '%m/%d/%y %H:%M')
+
+        timestamp_heure_travail_domicile_arrivee_vendredi = datetime.datetime.strptime(
+            "04/10/20 " + str(int(heure_arrivee_domicile_travail)) + ":" + str(
+                int(heure_arrivee_domicile_travail % 1 * 60)),
+            '%m/%d/%y %H:%M')
+
+
+
+        allez_travail_lundi = geojson.LineString(
+            [[long_domicile, lat_domicile, 0, datetime.datetime.timestamp(timestamp_heure_domicile_travail_depart_lundi) + 7200],
+             [long_travail, lat_travail, 0,
+              datetime.datetime.timestamp(timestamp_heure_domicile_travail_arrivee_lundi) + 7200],
+             [long_travail + 0.0000000000000000001, lat_travail, 0,
+              datetime.datetime.timestamp(timestamp_heure_domicile_travail_arrivee_lundi) + 7200.00000000000001]])
+
+        retour_travail_lundi = geojson.LineString(
+            [[long_travail, lat_travail, 0, datetime.datetime.timestamp(timestamp_heure_travail_domicile_depart_lundi) + 7200],
+             [long_domicile, lat_domicile, 0,
+              datetime.datetime.timestamp(timestamp_heure_travail_domicile_arrivee_lundi) + 7200],
+             [long_domicile + 0.0000000000000000001, lat_domicile, 0,
+              datetime.datetime.timestamp(timestamp_heure_travail_domicile_arrivee_lundi) + 7200.00000000000001]])
+
+        allez_travail_mardi = geojson.LineString(
+            [[long_domicile, lat_domicile, 0, datetime.datetime.timestamp(timestamp_heure_domicile_travail_depart_mardi) + 7200],
+             [long_travail, lat_travail, 0,
+              datetime.datetime.timestamp(timestamp_heure_domicile_travail_arrivee_mardi) + 7200],
+             [long_travail + 0.0000000000000000001, lat_travail, 0,
+              datetime.datetime.timestamp(timestamp_heure_domicile_travail_arrivee_mardi) + 7200.00000000000001]])
+
+        retour_travail_mardi = geojson.LineString(
+            [[long_travail, lat_travail, 0, datetime.datetime.timestamp(timestamp_heure_travail_domicile_depart_mardi) + 7200],
+             [long_domicile, lat_domicile, 0,
+              datetime.datetime.timestamp(timestamp_heure_travail_domicile_arrivee_mardi) + 7200],
+             [long_domicile + 0.0000000000000000001, lat_domicile, 0,
+              datetime.datetime.timestamp(timestamp_heure_travail_domicile_arrivee_mardi) + 7200.00000000000001]])
+
+        allez_travail_mercredi = geojson.LineString(
+            [[long_domicile, lat_domicile, 0, datetime.datetime.timestamp(timestamp_heure_domicile_travail_depart_mercredi) + 7200],
+             [long_travail, lat_travail, 0,
+              datetime.datetime.timestamp(timestamp_heure_domicile_travail_arrivee_mercredi) + 7200],
+             [long_travail + 0.0000000000000000001, lat_travail, 0,
+              datetime.datetime.timestamp(timestamp_heure_domicile_travail_arrivee_mercredi) + 7200.00000000000001]])
+
+        retour_travail_mercredi = geojson.LineString(
+            [[long_travail, lat_travail, 0, datetime.datetime.timestamp(timestamp_heure_travail_domicile_depart_mercredi) + 7200],
+             [long_domicile, lat_domicile, 0,
+              datetime.datetime.timestamp(timestamp_heure_travail_domicile_arrivee_mercredi) + 7200],
+             [long_domicile + 0.0000000000000000001, lat_domicile, 0,
+              datetime.datetime.timestamp(timestamp_heure_travail_domicile_arrivee_mercredi) + 7200.00000000000001]])
+
+        allez_travail_jeudi = geojson.LineString(
+            [[long_domicile, lat_domicile, 0, datetime.datetime.timestamp(timestamp_heure_domicile_travail_depart_lundi) + 7200],
+             [long_travail, lat_travail, 0,
+              datetime.datetime.timestamp(timestamp_heure_domicile_travail_arrivee_jeudi) + 7200],
+             [long_travail + 0.0000000000000000001, lat_travail, 0,
+              datetime.datetime.timestamp(timestamp_heure_domicile_travail_arrivee_jeudi) + 7200.00000000000001]])
+
+        retour_travail_jeudi = geojson.LineString(
+            [[long_travail, lat_travail, 0, datetime.datetime.timestamp(timestamp_heure_travail_domicile_depart_jeudi) + 7200],
+             [long_domicile, lat_domicile, 0,
+              datetime.datetime.timestamp(timestamp_heure_travail_domicile_arrivee_jeudi) + 7200],
+             [long_domicile + 0.0000000000000000001, lat_domicile, 0,
+              datetime.datetime.timestamp(timestamp_heure_travail_domicile_arrivee_jeudi) + 7200.00000000000001]])
+
+        allez_travail_vendredi = geojson.LineString(
+            [[long_domicile, lat_domicile, 0, datetime.datetime.timestamp(timestamp_heure_domicile_travail_depart_vendredi) + 7200],
+             [long_travail, lat_travail, 0,
+              datetime.datetime.timestamp(timestamp_heure_domicile_travail_arrivee_vendredi) + 7200],
+             [long_travail + 0.0000000000000000001, lat_travail, 0,
+              datetime.datetime.timestamp(timestamp_heure_domicile_travail_arrivee_vendredi) + 7200.00000000000001]])
+
+        retour_travail_vendredi = geojson.LineString(
+            [[long_travail, lat_travail, 0, datetime.datetime.timestamp(timestamp_heure_travail_domicile_depart_vendredi) + 7200],
+             [long_domicile, lat_domicile, 0,
+              datetime.datetime.timestamp(timestamp_heure_travail_domicile_arrivee_vendredi) + 7200],
+             [long_domicile + 0.0000000000000000001, lat_domicile, 0,
+              datetime.datetime.timestamp(timestamp_heure_travail_domicile_arrivee_vendredi) + 7200.00000000000001]])
+
+
+
+        allez_travail_lundi_feature = geojson.Feature(geometry=allez_travail_lundi, properties=properties_aller_travail)
+        retour_travail_lundi_feature = geojson.Feature(geometry=retour_travail_lundi, properties=properties_retour_travail)
+
+        allez_travail_mardi_feature = geojson.Feature(geometry=allez_travail_mardi, properties=properties_aller_travail)
+        retour_travail_mardi_feature = geojson.Feature(geometry=retour_travail_mardi, properties=properties_retour_travail)
+
+        allez_travail_mercredi_feature = geojson.Feature(geometry=allez_travail_mercredi, properties=properties_aller_travail)
+        retour_travail_mercredi_feature = geojson.Feature(geometry=retour_travail_mercredi, properties=properties_retour_travail)
+
+        allez_travail_jeudi_feature = geojson.Feature(geometry=allez_travail_jeudi, properties=properties_aller_travail)
+        retour_travail_jeudi_feature = geojson.Feature(geometry=retour_travail_jeudi, properties=properties_retour_travail)
+
+        allez_travail_vendredi_feature = geojson.Feature(geometry=allez_travail_vendredi, properties=properties_aller_travail)
+        retour_travail_vendredi_feature = geojson.Feature(geometry=retour_travail_vendredi, properties=properties_retour_travail)
+
+
+
+    elif(travail_semaine_weekend == "week-end"):
+
+        timestamp_heure_domicile_travail_depart_samedi = datetime.datetime.strptime(
+            "04/11/20 " + str(int(heure_depart_domicile_travail)) + ":" + str(
+                int(heure_depart_domicile_travail % 1 * 60)),
+            '%m/%d/%y %H:%M')
+
+        timestamp_heure_domicile_travail_arrivee_samedi = datetime.datetime.strptime(
+            "04/11/20 " + str(int(heure_debut_travail)) + ":" + str(
+                int(heure_debut_travail % 1 * 60)),
+            '%m/%d/%y %H:%M')
+
+        timestamp_heure_travail_domicile_depart_samedi = datetime.datetime.strptime(
+            "04/11/20 " + str(int(heure_fin_travail)) + ":" + str(
+                int(heure_fin_travail % 1 * 60)),
+            '%m/%d/%y %H:%M')
+
+        timestamp_heure_travail_domicile_arrivee_samedi = datetime.datetime.strptime(
+            "04/11/20 " + str(int(heure_arrivee_domicile_travail)) + ":" + str(
+                int(heure_arrivee_domicile_travail % 1 * 60)),
+            '%m/%d/%y %H:%M')
+
+        timestamp_heure_domicile_travail_depart_dimanche = datetime.datetime.strptime(
+            "04/12/20 " + str(int(heure_depart_domicile_travail)) + ":" + str(
+                int(heure_depart_domicile_travail % 1 * 60)),
+            '%m/%d/%y %H:%M')
+
+        timestamp_heure_domicile_travail_arrivee_dimanche = datetime.datetime.strptime(
+            "04/12/20 " + str(int(heure_debut_travail)) + ":" + str(
+                int(heure_debut_travail % 1 * 60)),
+            '%m/%d/%y %H:%M')
+
+        timestamp_heure_travail_domicile_depart_dimanche = datetime.datetime.strptime(
+            "04/12/20 " + str(int(heure_fin_travail)) + ":" + str(
+                int(heure_fin_travail % 1 * 60)),
+            '%m/%d/%y %H:%M')
+
+        timestamp_heure_travail_domicile_arrivee_dimanche = datetime.datetime.strptime(
+            "04/12/20 " + str(int(heure_arrivee_domicile_travail)) + ":" + str(
+                int(heure_arrivee_domicile_travail % 1 * 60)),
+            '%m/%d/%y %H:%M')
+
+        allez_travail_samedi = geojson.LineString(
+            [[long_domicile, lat_domicile, 0,
+              datetime.datetime.timestamp(timestamp_heure_domicile_travail_depart_samedi) + 7200],
+             [long_travail, lat_travail, 0,
+              datetime.datetime.timestamp(timestamp_heure_domicile_travail_arrivee_samedi) + 7200],
+             [long_travail + 0.0000000000000000001, lat_travail, 0,
+              datetime.datetime.timestamp(timestamp_heure_domicile_travail_arrivee_samedi) + 7200.00000000000001]])
+
+        retour_travail_samedi = geojson.LineString(
+            [[long_travail, lat_travail, 0,
+              datetime.datetime.timestamp(timestamp_heure_travail_domicile_depart_samedi) + 7200],
+             [long_domicile, lat_domicile, 0,
+              datetime.datetime.timestamp(timestamp_heure_travail_domicile_arrivee_samedi) + 7200],
+             [long_domicile + 0.0000000000000000001, lat_domicile, 0,
+              datetime.datetime.timestamp(timestamp_heure_travail_domicile_arrivee_samedi) + 7200.00000000000001]])
+
+        allez_travail_dimanche = geojson.LineString(
+            [[long_domicile, lat_domicile, 0,
+              datetime.datetime.timestamp(timestamp_heure_domicile_travail_depart_dimanche) + 7200],
+             [long_travail, lat_travail, 0,
+              datetime.datetime.timestamp(timestamp_heure_domicile_travail_arrivee_dimanche) + 7200],
+             [long_travail + 0.0000000000000000001, lat_travail, 0,
+              datetime.datetime.timestamp(timestamp_heure_domicile_travail_arrivee_dimanche) + 7200.00000000000001]])
+
+        retour_travail_dimanche = geojson.LineString(
+            [[long_travail, lat_travail, 0,
+              datetime.datetime.timestamp(timestamp_heure_travail_domicile_depart_dimanche) + 7200],
+             [long_domicile, lat_domicile, 0,
+              datetime.datetime.timestamp(timestamp_heure_travail_domicile_arrivee_dimanche) + 7200],
+             [long_domicile + 0.0000000000000000001, lat_domicile, 0,
+              datetime.datetime.timestamp(timestamp_heure_travail_domicile_arrivee_dimanche) + 7200.00000000000001]])
+
+        allez_travail_samedi_feature = geojson.Feature(geometry=allez_travail_samedi, properties=properties_aller_travail)
+        retour_travail_samedi_feature = geojson.Feature(geometry=retour_travail_samedi,
+                                                       properties=properties_retour_travail)
+
+        allez_travail_dimanche_feature = geojson.Feature(geometry=allez_travail_dimanche, properties=properties_aller_travail)
+        retour_travail_dimanche_feature = geojson.Feature(geometry=retour_travail_dimanche,
+                                                       properties=properties_retour_travail)
+
+
+    ############### CREATION DES LIGNES DE DONNEES A INSERER DANS LE GEOJSON #################
+
+
+    allez_parent = geojson.LineString([[long_domicile, lat_domicile, 0,datetime.datetime.timestamp(timestamp_heure_1_depart)+7200],
+                           [long_parent, lat_parent, 0,datetime.datetime.timestamp(timestamp_heure_1_arrivee)+7200 ],
+                                [long_parent+0.000001, lat_parent+0.000001, 0, datetime.datetime.timestamp(timestamp_heure_1_arrivee)+7200.0001]])
+
+    retour_parent = geojson.LineString([[long_parent, lat_parent, 0,datetime.datetime.timestamp(timestamp_heure_2_depart)+7200],
+                           [long_domicile, lat_domicile, 0,datetime.datetime.timestamp(timestamp_heure_2_arrivee)+7200 ],
+                                 [long_domicile+0.000001, lat_domicile+0.000001, 0, datetime.datetime.timestamp(timestamp_heure_2_arrivee)+7200.0001]])
+
+    allez_etude_lundi = geojson.LineString([[long_domicile, lat_domicile, 0,datetime.datetime.timestamp(timestamp_heure_domicile_etude_depart_lundi)+7200],
+                           [long_etude, lat_etude, 0,datetime.datetime.timestamp(timestamp_heure_domicile_etude_arrivee_lundi)+7200 ],
+                                [long_etude+0.00000000000000000001, lat_etude, 0, datetime.datetime.timestamp(timestamp_heure_domicile_etude_arrivee_lundi)+7200.0000000000001]])
+
+    retour_etude_lundi = geojson.LineString([[long_etude, lat_etude, 0,datetime.datetime.timestamp(timestamp_heure_etude_domicile_depart_lundi)+7200],
+                           [long_domicile, lat_domicile, 0,datetime.datetime.timestamp(timestamp_heure_etude_domicile_arrivee_lundi)+7200 ],
+                                 [long_domicile+0.0000000000000000001, lat_domicile, 0, datetime.datetime.timestamp(timestamp_heure_etude_domicile_arrivee_lundi)+7200.00000000000001]])
+
+    allez_etude_mardi = geojson.LineString([[long_domicile, lat_domicile, 0,datetime.datetime.timestamp(timestamp_heure_domicile_etude_depart_mardi)+7200],
+                           [long_etude, lat_etude, 0,datetime.datetime.timestamp(timestamp_heure_domicile_etude_arrivee_mardi)+7200 ],
+                                [long_etude+0.000001, lat_etude+0.000001, 0, datetime.datetime.timestamp(timestamp_heure_domicile_etude_arrivee_mardi)+7200.0001]])
+
+    retour_etude_mardi = geojson.LineString([[long_etude, lat_etude, 0,datetime.datetime.timestamp(timestamp_heure_etude_domicile_depart_mardi)+7200],
+                           [long_domicile, lat_domicile, 0,datetime.datetime.timestamp(timestamp_heure_etude_domicile_arrivee_mardi)+7200 ],
+                                 [long_domicile+0.000001, lat_domicile+0.000001, 0, datetime.datetime.timestamp(timestamp_heure_etude_domicile_arrivee_mardi)+7200.0001]])
+
+    allez_etude_mercredi = geojson.LineString([[long_domicile, lat_domicile, 0,datetime.datetime.timestamp(timestamp_heure_domicile_etude_depart_mercredi)+7200],
+                           [long_etude, lat_etude, 0,datetime.datetime.timestamp(timestamp_heure_domicile_etude_arrivee_mercredi)+7200 ],
+                                [long_etude+0.000001, lat_etude+0.000001, 0, datetime.datetime.timestamp(timestamp_heure_domicile_etude_arrivee_mercredi)+7200.0001]])
+
+    retour_etude_mercredi = geojson.LineString([[long_etude, lat_etude, 0,datetime.datetime.timestamp(timestamp_heure_etude_domicile_depart_mercredi)+7200],
+                           [long_domicile, lat_domicile, 0,datetime.datetime.timestamp(timestamp_heure_etude_domicile_arrivee_mercredi)+7200 ],
+                                 [long_domicile+0.000001, lat_domicile+0.000001, 0, datetime.datetime.timestamp(timestamp_heure_etude_domicile_arrivee_mercredi)+7200.0001]])
+
+    allez_etude_jeudi = geojson.LineString([[long_domicile, lat_domicile, 0,datetime.datetime.timestamp(timestamp_heure_domicile_etude_depart_jeudi)+7200],
+                           [long_etude, lat_etude, 0,datetime.datetime.timestamp(timestamp_heure_domicile_etude_arrivee_jeudi)+7200 ],
+                                [long_etude+0.000001, lat_etude+0.000001, 0, datetime.datetime.timestamp(timestamp_heure_domicile_etude_arrivee_jeudi)+7200.0001]])
+
+    retour_etude_jeudi = geojson.LineString([[long_etude, lat_etude, 0,datetime.datetime.timestamp(timestamp_heure_etude_domicile_depart_jeudi)+7200],
+                           [long_domicile, lat_domicile, 0,datetime.datetime.timestamp(timestamp_heure_etude_domicile_arrivee_jeudi)+7200 ],
+                                 [long_domicile+0.000001, lat_domicile+0.000001, 0, datetime.datetime.timestamp(timestamp_heure_etude_domicile_arrivee_jeudi)+7200.0001]])
+
+    allez_etude_vendredi = geojson.LineString([[long_domicile, lat_domicile, 0,datetime.datetime.timestamp(timestamp_heure_domicile_etude_depart_vendredi)+7200],
+                           [long_etude, lat_etude, 0,datetime.datetime.timestamp(timestamp_heure_domicile_etude_arrivee_vendredi)+7200 ],
+                                [long_etude+0.000001, lat_etude+0.000001, 0, datetime.datetime.timestamp(timestamp_heure_domicile_etude_arrivee_vendredi)+7200.0001]])
+
+    retour_etude_vendredi = geojson.LineString([[long_etude, lat_etude, 0,datetime.datetime.timestamp(timestamp_heure_etude_domicile_depart_vendredi)+7200],
+                           [long_domicile, lat_domicile, 0,datetime.datetime.timestamp(timestamp_heure_etude_domicile_arrivee_vendredi)+7200 ],
+                                 [long_domicile+0.000001, lat_domicile+0.000001, 0, datetime.datetime.timestamp(timestamp_heure_etude_domicile_arrivee_vendredi)+7200.0001]])
+
+
+
+
+
+    ######### PROPERTIES DE NOS TRIPS ###########
+
+
+    properties_aller_parent = {'name': "allez", 'type_trip': "parent_domicile", 'sexe': sexe, 'filiere': filiere,
+                               'boursier': boursier, 'revenu_fiscal': revenu_fiscal, 'situation': situation,
+                               'region_domicile': region_domicile, 'region_parent': region_parent}
+    properties_retour_parent = {'name': "retour", 'type_trip': "domicile_parent", 'sexe': sexe, 'filiere': filiere,
+                                'boursier': boursier, 'revenu_fiscal': revenu_fiscal, 'situation': situation,
+                                'region_domicile': region_domicile, 'region_parent': region_parent}
+
+
+    properties_aller_etude = {'name': "allez", 'type_trip': "domicile_etude", 'sexe': sexe, 'filiere': filiere,
+                              'boursier': boursier, 'revenu_fiscal': revenu_fiscal, 'situation': situation,
+                              'region_domicile': region_domicile, 'region_parent': region_parent}
+    properties_retour_etude = {'name': "retour", 'type_trip': "etude_domicile", 'sexe': sexe, 'filiere': filiere,
+                               'boursier': boursier, 'revenu_fiscal': revenu_fiscal, 'situation': situation,
+                               'region_domicile': region_domicile, 'region_parent': region_parent}
+
+
+
+
+
+    ######### CREATION DES FEATURES A INSERER DANS LA FEATURE COLLECTION ###########
+
+
+    allez_parent_feature = geojson.Feature(geometry=allez_parent, properties=properties_aller_parent)
+    retour_parent_feature = geojson.Feature(geometry=retour_parent, properties=properties_retour_parent)
+
+
+    allez_etude_lundi_feature = geojson.Feature(geometry=allez_etude_lundi, properties=properties_aller_etude)
+    retour_etude_lundi_feature = geojson.Feature(geometry=retour_etude_lundi, properties=properties_retour_etude)
+
+    allez_etude_mardi_feature = geojson.Feature(geometry=allez_etude_mardi, properties=properties_aller_etude)
+    retour_etude__mardi_feature = geojson.Feature(geometry=retour_etude_mardi, properties=properties_retour_etude)
+
+    allez_etude_mercredi_feature = geojson.Feature(geometry=allez_etude_mercredi, properties=properties_aller_etude)
+    retour_etude_mercredi_feature = geojson.Feature(geometry=retour_etude_mercredi, properties=properties_retour_etude)
+
+    allez_etude_jeudi_feature = geojson.Feature(geometry=allez_etude_jeudi, properties=properties_aller_etude)
+    retour_etude_jeudi_feature = geojson.Feature(geometry=retour_etude_jeudi, properties=properties_retour_etude)
+
+    allez_etude_vendredi_feature = geojson.Feature(geometry=allez_etude_vendredi, properties=properties_aller_etude)
+    retour_etude_vendredi_feature = geojson.Feature(geometry=retour_etude_vendredi, properties=properties_retour_etude)
+
+
+
+    return allez_parent_feature, retour_parent_feature, allez_etude_lundi_feature, retour_etude_lundi_feature, allez_etude_mardi_feature, retour_etude__mardi_feature, \
+           allez_etude_mercredi_feature, retour_etude_mercredi_feature, allez_etude_jeudi_feature, retour_etude_jeudi_feature, allez_etude_vendredi_feature, retour_etude_vendredi_feature, \
+           allez_travail_lundi_feature, retour_travail_lundi_feature, allez_travail_mardi_feature, retour_travail_mardi_feature,allez_travail_mercredi_feature, \
+           retour_travail_mercredi_feature, allez_travail_jeudi_feature, retour_travail_jeudi_feature, allez_travail_vendredi_feature, retour_travail_vendredi_feature,\
+           allez_travail_samedi_feature, retour_travail_samedi_feature, allez_travail_dimanche_feature, retour_travail_dimanche_feature,
+
+
+def creer_donnees_hexbin(nom_fichier_hexbin, travail_semaine_weekend, lat_domicile, long_domicile, lat_etude, long_etude,sexe, lat_travail, long_travail, filiere, boursier, revenu_fiscal, situation,heure_domicile_etude_depart,heure_etude_domicile_arrivee,region_domicile,region_parent,heure_depart_domicile_travail, heure_arrivee_domicile_travail):
+
+
+    with open(nom_fichier_hexbin, 'a', newline='') as csvfile:
+
+        fieldnames = ['lat', 'lng', 'date', 'type', 'sexe', 'filiere', 'boursier', 'revenu_fiscal', 'situation','region_domicile','region_parent']
+        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+        heure_debut = 4
+        while (heure_debut < heure_domicile_etude_depart):
+            timestamp = datetime.datetime.strptime(
+                "04/06/20 " + str(int(heure_debut)) + ":" + str(int(heure_debut % 1 * 60)),
+                '%m/%d/%y %H:%M')
+            writer.writerow({'lat': lat_domicile, 'lng': long_domicile, 'date': timestamp,
+                             'type': 'domicile',
+                             'sexe': sexe, 'filiere': filiere, 'boursier': boursier, 'revenu_fiscal': revenu_fiscal,
+                             'situation': situation,'region_domicile': region_domicile,'region_parent':region_parent})
+
+            heure_debut += 1
+
+        while (heure_debut < heure_etude_domicile_arrivee):
+            timestamp = datetime.datetime.strptime(
+                "04/06/20 " + str(int(heure_debut)) + ":" + str(int(heure_debut % 1 * 60)),
+                '%m/%d/%y %H:%M')
+            writer.writerow({'lat': lat_etude, 'lng': long_etude, 'date': timestamp,
+                         'type': 'etude',
+                         'sexe': sexe, 'filiere': filiere, 'boursier': boursier, 'revenu_fiscal': revenu_fiscal,
+                         'situation': situation,'region_domicile': region_domicile,'region_parent':region_parent})
+
+            heure_debut += 1
+        if (travail_semaine_weekend == "soir"):
+            while(heure_debut < heure_depart_domicile_travail):
+                timestamp = datetime.datetime.strptime(
+                    "04/06/20 " + str(int(heure_debut)) + ":" + str(int(heure_debut % 1 * 60)),
+                    '%m/%d/%y %H:%M')
+                writer.writerow({'lat': lat_domicile, 'lng': long_domicile, 'date': timestamp,
+                                 'type': 'travail',
+                                 'sexe': sexe, 'filiere': filiere, 'boursier': boursier, 'revenu_fiscal': revenu_fiscal,
+                                 'situation': situation, 'region_domicile': region_domicile,
+                                 'region_parent': region_parent})
+                heure_debut += 1
+
+            while (heure_debut < heure_arrivee_domicile_travail):
+                timestamp = datetime.datetime.strptime(
+                    "04/06/20 " + str(int(heure_debut)) + ":" + str(int(heure_debut % 1 * 60)),
+                    '%m/%d/%y %H:%M')
+                writer.writerow({'lat': lat_travail, 'lng': long_travail, 'date': timestamp,
+                                 'type': 'domicile',
+                                 'sexe': sexe, 'filiere': filiere, 'boursier': boursier, 'revenu_fiscal': revenu_fiscal,
+                                 'situation': situation, 'region_domicile': region_domicile,
+                                 'region_parent': region_parent})
+                heure_debut += 1
+
+        while (heure_debut < 24):
+            timestamp = datetime.datetime.strptime(
+                "04/06/20 " + str(int(heure_debut)) + ":" + str(int(heure_debut % 1 * 60)),
+                '%m/%d/%y %H:%M')
+            writer.writerow({'lat': lat_domicile, 'lng': long_domicile, 'date': timestamp,
+                             'type': 'domicile',
+                             'sexe': sexe, 'filiere': filiere, 'boursier': boursier, 'revenu_fiscal': revenu_fiscal,
+                             'situation': situation,'region_domicile': region_domicile,'region_parent':region_parent})
+
+            heure_debut += 1
+
+    """
+    timestamp_heure_domicile_etude_depart_lundi = datetime.datetime.strptime(
+        "04/06/20 " + str(int(heure_domicile_etude_depart)) + ":" + str(int(heure_domicile_etude_depart % 1 * 60)), '%m/%d/%y %H:%M')
+    timestamp_heure_domicile_etude_arrivee_lundi = datetime.datetime.strptime(
+        "04/06/20 " + str(int(heure_domicile_etude_arrivee)) + ":" + str(int(heure_domicile_etude_arrivee % 1 * 60)), '%m/%d/%y %H:%M')
+    timestamp_heure_etude_domicile_depart_lundi = datetime.datetime.strptime(
+        "04/06/20 " + str(int(heure_etude_domicile_depart)) + ":" + str(int(heure_etude_domicile_depart % 1 * 60)), '%m/%d/%y %H:%M')
+    timestamp_heure_etude_domicile_arrivee_lundi = datetime.datetime.strptime(
+        "04/06/20 " + str(int(heure_etude_domicile_arrivee)) + ":" + str(int(heure_etude_domicile_arrivee % 1 * 60)), '%m/%d/%y %H:%M')
+
+    with open(nom_fichier_hexbin, 'a', newline='') as csvfile:
+
+        fieldnames = ['lat', 'lng','date','type','sexe', 'filiere', 'boursier','revenu_fiscal','situation']
+        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+
+        writer.writerow({'lat': lat_domicile, 'lng' : long_domicile,'date':timestamp_heure_domicile_etude_depart_lundi,'type':'etude',
+                         'sexe' : sexe, 'filiere' : filiere, 'boursier' : boursier, 'revenu_fiscal' : revenu_fiscal, 'situation' : situation})
+
+        writer.writerow({'lat': lat_etude, 'lng': long_etude, 'date': timestamp_heure_domicile_etude_arrivee_lundi,
+                         'type': 'etude',
+                         'sexe': sexe, 'filiere': filiere, 'boursier': boursier, 'revenu_fiscal': revenu_fiscal,
+                         'situation': situation})
+
+        writer.writerow({'lat': lat_etude, 'lng': long_etude, 'date': timestamp_heure_etude_domicile_depart_lundi,
+                         'type': 'etude',
+                         'sexe': sexe, 'filiere': filiere, 'boursier': boursier, 'revenu_fiscal': revenu_fiscal,
+                         'situation': situation})
+
+        writer.writerow({'lat': lat_domicile, 'lng': long_domicile, 'date': timestamp_heure_etude_domicile_arrivee_lundi,
+                         'type': 'etude',
+                         'sexe': sexe, 'filiere': filiere, 'boursier': boursier, 'revenu_fiscal': revenu_fiscal,
+                         'situation': situation})
+
+        
+        if (lat_parent is not None and visite_parent ==True):
+            writer.writerow({'depart_lat': lat_domicile, 'depart_lng' : long_domicile, 'arrivee_lat': lat_parent,'arrivee_lng' : long_parent,'type':'parent',
+                             'sexe': sexe, 'filiere': filiere, 'boursier': boursier, 'revenu_fiscal': revenu_fiscal,
+                             'situation': situation})
+
+        if(lat_travail is not None):
+            writer.writerow({'depart_lat': lat_domicile, 'depart_lng' : long_domicile, 'arrivee_lat': lat_travail,'arrivee_lng' : long_travail, 'type':'travail',
+                             'sexe': sexe, 'filiere': filiere, 'boursier': boursier, 'revenu_fiscal': revenu_fiscal,
+                             'situation': situation})
+
+        """
 
 
 
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-    ################# ICI TU PEUX AJOUTER DES PROPERTIES #######################
-    # IL FAUT LES PASSER EN ATTRIBUTS DE CETTE FONCTION ET DE LA FONCTION EMPLOI DU TEMPS
-
-
-
-    properties1 = {'name': "allez",'type_trip' : "parent_domicile",'sexe' : sexe, 'filiere': filiere,'boursier' : boursier,'revenu_fiscal': revenu_fiscal,'situation': situation}
-    allez_feature = geojson.Feature(geometry=allez_parent, properties=properties1)
-    properties2 = {'name': "retour",'type_trip' : "domicile_parent",'sexe' : sexe, 'filiere': filiere,'boursier' : boursier,'revenu_fiscal': revenu_fiscal,'situation': situation}
-    retour_feature = geojson.Feature(geometry=retour_parent, properties=properties2)
-
-    return allez_feature, retour_feature
-
-
-
-
-
-
-
-
-
-def Emploi_Temps (nom_fichier_arc, lat_domicile, long_domicile, lat_etude, long_etude, lat_parent, long_parent, lat_travail, long_travail,sexe, filiere, boursier, revenu_fiscal, situation):
+def Emploi_Temps (nom_fichier_arc,nom_fichier_hexbin, lat_domicile, long_domicile, lat_etude, long_etude, lat_parent, long_parent, lat_travail, long_travail,sexe, filiere, boursier, revenu_fiscal, situation,region_domicile,region_parent):
     """
 
     :param nom_fichier_arc: nom du fichier avec les arcs
@@ -335,21 +940,19 @@ def Emploi_Temps (nom_fichier_arc, lat_domicile, long_domicile, lat_etude, long_
 
     heure_depart_domicile_cours, heure_debut_cours, heure_fin_cours, heure_arrivee_domicile_cours = horaires_cours(
         lat_domicile, long_domicile, lat_etude, long_etude)
+    travail_semaine_weekend="non"
+    heure_depart_domicile_parent = heure_arrivee_parent = heure_depart_parent = heure_arrivee_domicile_parent = 0
+    visite_parent = False
     random_parent = randrange(10)
+    heure_depart_domicile_travail = 0
+    heure_debut_travail = 0
+    heure_fin_travail = 0
+    heure_arrivee_domicile_travail = 0
     if (random_parent<=6 and lat_parent is not None and lat_parent != lat_domicile and Calc_Distance(lat_domicile, long_domicile, lat_parent, long_parent)<650):
-        heure_depart_domicile_parent, heure_arrivee_parent,  heure_depart_parent,heure_arrivee_domicile_parent = horaires_parent(
-            lat_domicile, long_domicile, lat_parent, long_parent)
         visite_parent = True
-        allez_feature, retour_feature = creer_donnees_trip(lat_domicile, long_domicile, lat_parent, long_parent,heure_depart_domicile_parent, heure_arrivee_parent, heure_depart_parent,heure_arrivee_domicile_parent,sexe, filiere, boursier, revenu_fiscal, situation)
-        features.append(allez_feature)
-        features.append(retour_feature)
-
-
-    else :
-        visite_parent = False
 
     if (lat_travail is not None):
-        heure_depart_domicile_travail, heure_debut_travail, heure_fin_travail, heure_arrivee_domicile_travail = horaires_travail(
+        heure_depart_domicile_travail, heure_debut_travail, heure_fin_travail, heure_arrivee_domicile_travail, travail_semaine_weekend = horaires_travail(
             heure_arrivee_domicile_cours, lat_domicile, long_domicile, lat_travail, long_travail, visite_parent)
         if (heure_depart_domicile_travail is None):
             travail = False
@@ -359,15 +962,88 @@ def Emploi_Temps (nom_fichier_arc, lat_domicile, long_domicile, lat_etude, long_
     else:
         travail = False
 
+    if (visite_parent == True):
+        heure_depart_domicile_parent, heure_arrivee_parent, heure_depart_parent, heure_arrivee_domicile_parent = horaires_parent(
+            lat_domicile, long_domicile, lat_parent, long_parent)
 
-    creer_donnees_arc(nom_fichier_arc, travail, lat_domicile, long_domicile, lat_etude, long_etude, lat_parent, long_parent, lat_travail, long_travail,visite_parent)
+
+
+    allez_feature, retour_feature, allez_etude_lundi, retour_etude_lundi, allez_etude_mardi, retour_etude_mardi, \
+    allez_etude_mercredi, retour_etude_mercredi, allez_etude_jeudi, retour_etude_jeudi, allez_etude_vendredi, \
+    retour_etude_vendredi, allez_travail_lundi_feature, retour_travail_lundi_feature, allez_travail_mardi_feature, retour_travail_mardi_feature, allez_travail_mercredi_feature, \
+    retour_travail_mercredi_feature, allez_travail_jeudi_feature, retour_travail_jeudi_feature, allez_travail_vendredi_feature, retour_travail_vendredi_feature, \
+    allez_travail_samedi_feature, retour_travail_samedi_feature, allez_travail_dimanche_feature, retour_travail_dimanche_feature = creer_donnees_trip(
+        lat_domicile, long_domicile, lat_parent, long_parent, lat_etude, long_etude, lat_travail, long_travail,
+        heure_depart_domicile_cours, heure_debut_cours, heure_fin_cours, heure_arrivee_domicile_cours,
+        heure_depart_domicile_parent, heure_arrivee_parent, heure_depart_parent, heure_arrivee_domicile_parent,
+        heure_depart_domicile_travail, heure_debut_travail,
+        heure_fin_travail, heure_arrivee_domicile_travail, travail_semaine_weekend,
+        sexe, filiere, boursier, revenu_fiscal, situation, region_domicile, region_parent)
 
 
 
 
+    features.append(allez_etude_lundi)
+    features.append(retour_etude_lundi)
+    """
+    features.append(allez_etude_mardi)
+    features.append(retour_etude_mardi)
+    features.append(allez_etude_mercredi)
+    features.append(retour_etude_mercredi)
+    features.append(allez_etude_jeudi)
+    features.append(retour_etude_jeudi)
+    features.append(allez_etude_vendredi)
+    features.append(retour_etude_vendredi)
+        
+    """
+    if(travail_semaine_weekend == "soir"):
+        features.append(allez_travail_lundi_feature)
+        features.append(retour_travail_lundi_feature)
+    """
+            features.append(allez_travail_mardi_feature)
+            features.append(retour_travail_mardi_feature)
+
+            features.append(allez_travail_mercredi_feature)
+            features.append(retour_travail_mercredi_feature)
+
+            features.append(allez_travail_jeudi_feature)
+            features.append(retour_travail_jeudi_feature)
+
+            features.append(allez_travail_vendredi_feature)
+            features.append(retour_travail_vendredi_feature)
+        
+    elif(travail_semaine_weekend == "week-end"):
+
+            features.append(allez_travail_samedi_feature)
+            features.append(retour_travail_samedi_feature)
+
+            features.append(allez_travail_dimanche_feature)
+            features.append(retour_travail_dimanche_feature)
+
+    if (visite_parent == True):
+            features.append(allez_feature)
+            features.append(retour_feature)
+    """
+
+
+
+
+
+    creer_donnees_arc(nom_fichier_arc, lat_domicile, long_domicile, lat_etude, long_etude, lat_parent, long_parent, lat_travail, long_travail,visite_parent,sexe, filiere, boursier, revenu_fiscal, situation,region_domicile,region_parent)
+
+    creer_donnees_hexbin(nom_fichier_hexbin, travail_semaine_weekend, lat_domicile, long_domicile, lat_etude, long_etude,sexe, lat_travail, long_travail, filiere, boursier, revenu_fiscal, situation,heure_depart_domicile_cours,heure_arrivee_domicile_cours,region_domicile,region_parent,heure_depart_domicile_travail, heure_arrivee_domicile_travail)
 
 if __name__ == "__main__":
-    with open("data_stud.geojson") as f:
+    with open('metropole.geojson') as f:
+        data = geojson.load(f)
+
+    # construct point based on lon/lat returned by geocoder
+
+    # check each polygon to see if it contains the point
+
+    polygon = shape(data['geometry'])
+
+    with open("data_stud_200k.geojson") as f:
         data = geojson.load(f)
     features = data['features'][0]["properties"]
     print(features)
@@ -376,26 +1052,34 @@ if __name__ == "__main__":
 
     ############## PARAMETRES A MODIFIER ################
 
-    nom_fichier_arc = 'test_arc_5.csv'
+    nom_fichier_arc = 'test_arc.csv'
 
-    nom_fichier_trip = 'test_trip_5.geojson'
+    nom_fichier_trip = 'test_trip.geojson'
 
-    nombre_etudiants = 3000
+    nom_fichier_hexbin = 'test_hexbin.csv'
 
 ####################################################
 
     features =[]
 
     with open(nom_fichier_arc, 'w', newline='') as csvfile:
-        fieldnames = ['depart_lat', 'depart_lng', 'arrivee_lat', 'arrivee_lng','type',]
+        fieldnames = ['depart_lat', 'depart_lng', 'arrivee_lat', 'arrivee_lng','type','sexe', 'filiere', 'boursier','revenu_fiscal','situation','region_domicile','region_parent']
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
 
         writer.writeheader()
-    for feature in data['features']:
 
+    with open(nom_fichier_hexbin, 'w', newline='') as csvfile:
+        fieldnames = ['lat', 'lng','date','type','sexe', 'filiere', 'boursier','revenu_fiscal','situation','region_domicile','region_parent']
+        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+
+        writer.writeheader()
+    i = 0
+
+    for feature in data['features']:
+        i+=1
+        print(i)
 ############## DÉFINIR CES VALEURS ################
 ########## METTRE None SI PAS DE VALEUR ###########
-
 
         if (feature['properties']['emploi'] == "oui"):
             lat_travail = feature['properties']['coordinates_travail'][0]
@@ -407,20 +1091,46 @@ if __name__ == "__main__":
         lat_parent = feature['properties']['coordinates_parents'][0]
         lat_etude = feature['properties']['coordinates_etab'][0]
         long_etude = feature['properties']['coordinates_etab'][1]
+
         long_domicile = feature['geometry']['coordinates'][1]
         long_parent = feature['properties']['coordinates_parents'][1]
+        """
+        if (lat_etude > 48.9 or lat_etude < 48.8 or long_etude > 2.65 or long_etude < 2.53):
+            continue
+        """
+
+        if (Calc_Distance(lat_domicile, long_domicile, lat_etude, long_etude) > 20):
+            continue
+
+        point_domicile = Point(long_domicile, lat_domicile)
+
+        if polygon.contains(point_domicile)==False:
+            continue
+
+        point_parent = Point(long_parent, lat_parent)
+
+
+        if polygon.contains(point_parent) == False:
+            continue
+
 
         sexe = feature['properties']['sexe']
         boursier = feature['properties']['bourse']
         situation = feature['properties']['situation']
         filiere = feature['properties']['discipline']
-        revenu_fiscal = feature['properties']['revenu_fiscal']
+        try:
+            revenu_fiscal = feature['properties']['revenu_fiscal'][0]
+        except:
+            revenu_fiscal = feature['properties']['revenu_fiscal']
+        region_domicile = feature['properties']['region_domicile']
+        region_parent = feature['properties']['region_parent']
+
 
 ##################################################
 
-        Emploi_Temps(nom_fichier_arc, lat_domicile, long_domicile, lat_etude, long_etude, lat_parent, long_parent, lat_travail,
-                     long_travail,sexe, filiere, boursier, revenu_fiscal, situation)
-    
+        Emploi_Temps(nom_fichier_arc, nom_fichier_hexbin, lat_domicile, long_domicile, lat_etude, long_etude, lat_parent, long_parent, lat_travail,
+                     long_travail,sexe, filiere, boursier, revenu_fiscal, situation,region_domicile,region_parent)
+
     feature_collection = geojson.FeatureCollection(features)
     with open(nom_fichier_trip, 'w') as f:
         geojson.dump(feature_collection, f)
