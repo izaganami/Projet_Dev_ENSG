@@ -1,19 +1,27 @@
+"""
+Cette fonction permet de calculer la distance entre 2 adresses
+"""
+
+## Modules ##
 import math as m
 import math
+
+
+
 class Calc_Address:
     def __init__(self):
-        print("calc address Created")
-    def Calculate(self,long1,lat1,long2,lat2):
-        R=6373
-        lon1,lon2,lat1,lat2=math.radians(float(long1)),math.radians(float(long2)),math.radians(float(lat1)),math.radians(float(lat2))
-        dlon=lon2-lon1
-        dlat=abs(lat2-lat1)
-        havers=math.sin(dlat/2)**2 + math.cos(lat1)*math.cos(lat2)*math.sin(dlon/2)**2
-        c=2*math.atan2(math.sqrt(havers),math.sqrt(1-havers))
-        return R*c
+        print("Calc_Adress")
 
     def Calc_Distance(self,lat1, long1, lat2, long2):
-        # approximate radius of earth in km
+        """
+        Calcule la distance entre 2 points
+        :param lat1: latitude du point1
+        :param long1: longitude du point 1
+        :param lat2: latitude du point 2
+        :param long2: longitude du point 2
+        :return: distance entre le point 1 et le point 2
+        """
+        # rayon approximé de la Terre
         R = 6373.0
 
         lat1 = m.radians(lat1)

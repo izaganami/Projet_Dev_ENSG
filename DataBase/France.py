@@ -1,21 +1,32 @@
+"""
+Cette fonction permet de savoir dans quelle région se trouve un point
+"""
+
+## Modules ##
 import geojson
-
 from shapely.geometry import shape, Point
-# depending on your version, use: from shapely.geometry import shape, Point
 
 
-def in_France(lat,long):
-    # load GeoJSON file containing sectors
-    with open('metropole.geojson') as f:
+def find_region(lat, long):
+    """
+
+    :param lat: latitude du point
+    :param long: longitude du point
+    :return: string du nom de la région ou "Outre-Mer"
+    """
+    with open('regions.geojson') as f:
         data = geojson.load(f)
 
     # construct point based on lon/lat returned by geocoder
-    point = Point(long, lat)
+        point = Point(long, lat)
 
     # check each polygon to see if it contains the point
 
-    polygon = shape(data['geometry'])
-    if polygon.contains(point):
-        return True
-    else :
-        return False
+        for feature in data['features']:
+            polygon = shape(feature['geometry'])
+
+            if polygon.contains(point):
+                return feature['properties']['nom']
+            else :
+                continue
+        return"Outre-Mer"
