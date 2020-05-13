@@ -800,14 +800,14 @@ if __name__ == "__main__":
 
     ############## PARAMETRES A MODIFIER ################
 
-    nom_fichier_data = "Data_Created/data_stud_200k.geojson"
+    nom_fichier_data = "data_stud_200k.geojson"
 
-    nom_fichier_arc = 'Data_Created/arc_200k.csv'
+    nom_fichier_arc = 'arc_200k.csv'
 
-    nom_fichier_trip_etude = 'Data_Created/trip_etude_200k.geojson'
-    nom_fichier_trip_travail = 'Data_Created/trip_travail_200k.geojson'
+    nom_fichier_trip_etude = 'trip_etude_200k.geojson'
+    nom_fichier_trip_travail = 'trip_travail_200k.geojson'
 
-    nom_fichier_hexbin = 'Data_Created/hexbin_200k.csv'
+    nom_fichier_hexbin = 'hexbin_200k.csv'
 
     ######################################################
 
