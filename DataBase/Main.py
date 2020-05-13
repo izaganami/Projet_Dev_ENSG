@@ -363,17 +363,33 @@ with open(r'data_domicile.geojson', encoding='utf-8') as fp:
                             coordinates_travail = []
 
 
-                        #On calcule le revenu fiscal de la famille de l'étudiant
-                        rev_init = 20000
+                        # On calcule le revenu fiscal de la famille de l'étudiant
+
+                        # Revenu fiscal moyen lorsque l'étudiant  étudie à côté de chez ses parents
+                        rev_init = 23000
+
+                        # Revenu fiscal moyen lorsque la distance tend vers l'infini
                         rev_fin = 40000
+
+                        # Paramètre qui fait converger plus ou moins vite la fonction exponentielle
                         seuil = 300
-                        ecart_type = 5000
+
+                        # Ecart type de la loi normale qui générera le revenu du foyer considéré
+                        ecart_type = 4000
 
                         C = Calc_Address.Calc_Address()
+
+                        # Calcul de la distance entre le lieu d'étude et le domicile parental
                         dist = C.Calc_Distance(coordinates_parents[0], coordinates_parents[1], coordinates_domicile[0],
                                                coordinates_domicile[1])
+
+                        # Importation de la classe Revenus
                         R = Revenus.Revenus()
+
+                        # Calcul du revenu moyen en fonction de la distance entre le lieu d'étude et le domicile parental
                         rev_moyen = R.calcul_exp(rev_fin, rev_init, seuil, dist)
+
+                        # Distinction du cas boursier du cas non boursier
                         if (bourse=="oui"):
                             revenu_fisc = R.estime_revenu()
                         else:
@@ -750,9 +766,3 @@ with open(r'data_domicile.geojson', encoding='utf-8') as fp:
 with open('Data_Created/data_stud_200k.geojson', 'w', encoding='utf-8') as outfile:
     #on insère tous nos étudiants dans le fichier
     json.dump(data_etud, outfile, ensure_ascii=False)
-
-
-
-
-
-
