@@ -52,13 +52,15 @@ You can identify them in the panel control of kepler by clicking on it.
 
 * *Points: Lieu de travail*: based on *lieu d'étude*, fictitious position
 
-* *Hexbins*: same amount as points, real position for *étude*, fictitious for *domicile* and *travail*
+* *Statics hexbins*: same amount as points, real position for *étude*, fictitious for *domicile* and *travail*
+
+* *Dynamics hexbins*: same amount as points, real position for *étude*, fictitious for *domicile* and *travail* for a day
 
 * *Arc*: same amount as data's row, link between two points
 
-* *Trips: étude*: 2 per student (round-trip)
+* *Trips: étude*: 2 per student for a day(round-trip)
 
-* *Trips: travail*: 2 per student worker (round-trip)
+* *Trips: travail*: 2 per student worker for a day(round-trip)
 
 
 
