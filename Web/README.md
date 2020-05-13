@@ -46,7 +46,7 @@ You can identify them in the panel control of kepler by clicking on it.
 
 * *Points: Domicile parental*: same amount as student's, fictitious position
 
-* *Points: résidence étudiante* (obtained by filtering Domicile courant): real position
+* *Points: Résidence étudiante* (obtained by filtering Domicile courant): real position
 
 * *Points: Lieu d'étude*: same amount as student's, real position
 
