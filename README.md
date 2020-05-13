@@ -56,9 +56,7 @@ pip install uuid
 pip install re
 pip install codecs
 ```
-Sample data are available in the DataBase/Data_Created folder. You can use them directly with kepler.gl.
-
-To create the data by yourself, open the file Main in the DataBase folder and run it. It creates the file "data_stud_200k" in the Data_Created folder. Then, run the Create_flow file, it will produce 4 files you can use with kepler.gl : "arc_200k.csv", "hexbin_200k.csv", "trip_etude_200k.csv" and "trip_travail_200k.csv"
+To create the data, open the file Main in the DataBase folder and run it. It creates the file "data_stud_200k". Then, run the Create_flow file, it will produce 4 files you can use with kepler.gl : "arc_200k.csv", "hexbin_200k.csv", "trip_etude_200k.csv" and "trip_travail_200k.csv"
 
 
 ## Deployment
