@@ -20,7 +20,7 @@ If the page doesn't load, please make sure to have an Internet connection, or re
 
 ## Deployment
 
-To create new page:
+To create a new page:
 
 * Go to the [Kepler website demo](https://kepler.gl/demo)
 
@@ -28,7 +28,7 @@ To create new page:
 
 * Configure your parameters using the panel control on the left
 
-* Export the map using the sharing button at the top-right corner of the panel control and do not forget to paste the MapBox Access Token above
+* Export the map using the sharing button at the top right corner of the panel control and do not forget to paste the MapBox Access Token above
 
 ## Data
 
