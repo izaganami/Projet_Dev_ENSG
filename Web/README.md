@@ -44,7 +44,7 @@ You can identify them in the panel control of kepler by clicking on it.
 
 * *MLV wide*: 2 958 students, 7 446 arcs
 
-* *Points: Domicile parentale*: same amount as student's, fictitious position
+* *Points: Domicile parental*: same amount as student's, fictitious position
 
 * *Points: résidence étudiante* (obtained by filtering Domicile courant): real position
 
