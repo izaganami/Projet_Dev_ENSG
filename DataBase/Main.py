@@ -73,6 +73,7 @@ data_etud['features'] = []
 liste_coord_etab=[]
 with open(r'Data_proj/implantout.json', encoding='utf-8') as file:
 
+    #Pour chaque établissement, on récupère ses coordonnées et la filière enseignée
     for ligne in file:
         try:
             data = json.loads(ligne)
@@ -87,42 +88,50 @@ with open(r'Data_proj/implantout.json', encoding='utf-8') as file:
 
 ####### CRÉATION D'UN POLYGONE DE LA FRANCE + OUTRE MER #######
 
-with open('france.geojson') as f:
+with open('Data_proj/france.geojson') as f:
     data = geojson.load(f)
 polygon_france = shape(data['geometry'])
 
 
 
-####### CRÉATION DE 5 LIEUX D'ÉTUDE POUR CHAQUE LIEUX D'ÉTUDE ########
+####### CRÉATION DE 5 LIEUX DE TRAVAIL POUR CHAQUE LIEU D'ÉTUDE ########
 liste_lieux_travail =[]
 
 with open(r'Data_proj/implantout.json', encoding='utf-8') as file:
     print("Chargement des lieux de travail...")
     i=0
+    #Pour chaque lieu d'étude dans le fichier
     for ligne in file:
         i += 1
         print(i)
-        for k in range(1):
+        #On itère 5 fois
+        for k in range(5):
             coordinates_test =""
+            #on cherche un lieu
             try:
                 data = json.loads(ligne)
+                #On récupère la latitude et la longitude de l'établissement
                 lat = data["fields"]["coordonnees"][0]
                 long = data["fields"]["coordonnees"][1]
                 coordinates_lieu_travail =[]
-                test_adresse_France= False
+                test_adresse_France = False
                 test=0
+                #On cherche une position en France (éviter d'aller dans la mer), dans un rayon autour du lieu d'étude
                 while (test_adresse_France == False):
                     test+=1
                     T = Gen_Address.Gen_Address()
                     coordinates_lieu_travail = T.Gen_Address_Within_Distane(lat, long)
+                    #la position est-elle en France
                     if (polygon_france.contains(Point(coordinates_lieu_travail[1], coordinates_lieu_travail[0]))):
                         test_adresse_France=True
+                    #Si on ne trouve rien après 6 itérations, on passe cet établissement
                     if (test>6):
                         coordinates_test="invalides"
                         break
                 if(coordinates_test=="invalides"):
                     continue
                 else:
+                    #On attribue au lieu un type de travail
                     type_emploi = random.choice(["Serveur(se)",
                                                  "Hôte ou hôtesse d'accueil",
                                                  "Employé(e) du commerce ou de fast-food"])
@@ -140,7 +149,7 @@ with open(r'Data_proj/implantout.json', encoding='utf-8') as file:
 
 #########################################   CRÉATION DES ÉTUDIANTS   #########################################
 
-with open(r'data_domicile.geojson', encoding='utf-8') as fp:
+with open(r'Data_proj/data_domicile.geojson', encoding='utf-8') as fp:
     print("Génération des étudiants...")
     residence_etudiante = True
     C = Calc_Address.Calc_Address()
@@ -197,8 +206,7 @@ with open(r'data_domicile.geojson', encoding='utf-8') as fp:
                     # 200 000 étudiants (de 360 000 à 36 000 en résidence)
 
                     #Pour chaque résidence
-                    #counter = int(int(line["properties"]["capacity"])/10)
-                    counter=0
+                    counter = int(int(line["properties"]["capacity"])/10)
 
                     while counter > 0:
 
@@ -685,7 +693,7 @@ with open(r'data_domicile.geojson', encoding='utf-8') as fp:
                         break
                         dist_min=1000
 
-            #l'étudiant se rend dans l'établissement le plus proche de chez lui
+            #l'étudiant se rend dans l'établissement le plus proche de chez lui si il n'a rien trouver
             if(pas_trouver_etab == True):
                 with open(r'Data_proj/implantout.json', encoding='utf-8') as file:
                     for ligne in file:

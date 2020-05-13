@@ -14,7 +14,7 @@ def find_region(lat, long):
     :param long: longitude du point
     :return: string du nom de la région ou "Outre-Mer"
     """
-    with open('regions.geojson') as f:
+    with open('Data_proj/regions.geojson') as f:
         data = geojson.load(f)
 
     # construct point based on lon/lat returned by geocoder
