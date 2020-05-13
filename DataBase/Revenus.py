@@ -55,26 +55,33 @@ class Revenus:
             revenu = revenu_max
         return revenu
 
-    def plot(self, rev_fin, rev_init, seuil, dist, ecart_type):
+    def plot(self, rev_fin, rev_init, seuil, abscisse):
+        """
+        Affichage de la courbe des revenus fiscaux moyens en fonction de la distance
+
+        param rev_fin : revenu fiscal moyen limite quand la distance tant vers l'infini
+        type rev_fin : float
+        param rev_init : revenu fiscal moyen des familles habitant sur le lieu d'étude
+        type rev_init : float
+        param seuil : distance type (convergence plus ou moins rapide de la fonction exponentielle)
+        type seuil : float
+        param abscisse : tableau des distances dont on souhaite connaître le revenu fiscal moyen
+        type abscisse : array
+
+        return : tableau des revenus fiscaux moyens
+        rtype : array
+        """
+        # Tableaux des abscisses (distances entre le domicile parental et le lieu d'étude)
         abscisse = np.linspace(0, 1000, 1000)
-        est_boursier = False
 
         # Revenu fiscal moyen lorsque l'étudiant  étudie à côté de chez ses parents
         rev_init = 23000
 
         # Revenu fiscal moyen lorsque la distance tend vers l'infini
         rev_fin = 40000
-        dist = 0
+
+        # Paramètre qui fait converger plus ou moins vite la fonction exponentielle
         seuil = 300
-
-        rev_moyen = calcul_exp(rev_fin, rev_init, seuil, dist)
-        ecart_type = 4000
-
-        # Si l'étudiant est boursier, on garde les valeurs par défaut, sinon on utilise les valeurs adaptées à la distance
-        if est_boursier:
-            revenu_fisc = estime_revenu()
-        else:
-            revenu_fisc = estime_revenu(rev_moyen, ecart_type)
 
         # Affichage de la courbe du revenu fiscal moyen en fonction de la distance
         ordonnee = calcul_exp(rev_fin, rev_init, seuil, abscisse)
