@@ -771,6 +771,6 @@ with open(r'Data_proj/data_domicile.geojson', encoding='utf-8') as fp:
 
 ####### CRÉATION DU FICHIER GEOJSON DE NOS ÉTUDIANTS #######
 
-with open('Data_Created/data_stud_200k.geojson', 'w', encoding='utf-8') as outfile:
+with open('data_stud_200k.geojson', 'w', encoding='utf-8') as outfile:
     #on insère tous nos étudiants dans le fichier
     json.dump(data_etud, outfile, ensure_ascii=False)
