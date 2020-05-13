@@ -16,7 +16,7 @@ class Revenus:
         type rev_fin : float
         param rev_init : revenu fiscal moyen des familles habitant sur le lieu d'étude
         type rev_init : float
-        param seuil : distance type
+        param seuil : distance type (convergence plus ou moins rapide de la fonction exponentielle)
         type seuil : float
         param dist : tableau des distances dont on souhaite connaître le revenu fiscal moyen
         type dist : array
@@ -29,10 +29,13 @@ class Revenus:
     def estime_revenu(self,rev_moyen=17000, ecart_type=2000):
         """
         Calcule le revenu fiscal à l'aide d'une loi normale
+
         param rev_moyen : revenu fiscal moyen (moyenne de la loi normale)
         type rev_fin : float (par défaut l'étudiant est boursier le revenu moyen est de 17000€)
         param ecart_type : écart type de la loi normale
         type ecart_type : float (par défaut pour les boursiers l'écart type des revenus est de 2000€)
+
+        return : revenu fiscal estimé selon les paramètres de la loi normale
         """
 
         revenu = (np.random.randn(1) * ecart_type + rev_moyen)[0]
@@ -56,7 +59,10 @@ class Revenus:
         abscisse = np.linspace(0, 1000, 1000)
         est_boursier = False
 
+        # Revenu fiscal moyen lorsque l'étudiant  étudie à côté de chez ses parents
         rev_init = 23000
+
+        # Revenu fiscal moyen lorsque la distance tend vers l'infini
         rev_fin = 40000
         dist = 0
         seuil = 300
@@ -70,7 +76,7 @@ class Revenus:
         else:
             revenu_fisc = estime_revenu(rev_moyen, ecart_type)
 
-        # Affichage de la courbe
+        # Affichage de la courbe du revenu fiscal moyen en fonction de la distance
         ordonnee = calcul_exp(rev_fin, rev_init, seuil, abscisse)
 
         plt.figure()
@@ -80,5 +86,3 @@ class Revenus:
         plt.ylabel("Revenu fiscal moyen par foyer en €")
         plt.grid()
         plt.show()
-
-        print("Le revenu fiscal est : " + str(revenu_fisc[0]) + " €")
